@@ -1,0 +1,68 @@
+{
+    "productName": "YT Downloader",
+    "homepage": "https://software-city.org/",
+    "bugs": {
+        "url": "https://github.com/Davis-Software/YTDownloader/issues",
+        "email": "support@software-city.org"
+    },
+    "author": {
+        "name": "Software City Team",
+        "email": "support@software-city.org",
+        "url": "https://github.com/Davis-Software/YTDownloader"
+    },
+    "name": "swc_ytdownloader",
+    "version": "0.1.8",
+    "description": "Download and convert Videos from YouTube",
+    "repository": "https://github.com/Davis-Software/YTDownloader",
+    "license": "MIT",
+    "main": "index.js",
+    "scripts": {
+        "start": "electron .",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder --x64 --win",
+        "distlinux": "electron-builder --x64 --linux",
+        "distmacOS": "electron-builder --x64 --mac",
+        "publish": "electron-builder --x64 --win -p always",
+        "publishlinux": "electron-builder --x64 --linux -p always",
+        "publishmacOS": "electron-builder --x64 --mac -p always"
+    },
+    "devDependencies": {
+        "electron": "latest",
+        "electron-builder": "latest"
+    },
+    "dependencies": {
+        "axios": "latest",
+        "electron-updater": "latest"
+    },
+    "build": {
+        "appId": "org.software-city.projects.ytdownloader",
+        "extraFiles": [
+            "tools"
+        ],
+        "win": {
+            "target": "nsis-web",
+            "icon": "./static/logo/512x512.ico",
+            "publish": {
+                "provider": "github",
+                "publishAutoUpdate": true,
+                "releaseType": "release"
+            }
+        },
+        "linux": {
+            "target": "deb",
+            "icon": "./static/logo/265x265.png",
+            "category": "Utility",
+            "publish": {
+                "provider": "github",
+                "publishAutoUpdate": true,
+                "releaseType": "release"
+            }
+        },
+        "protocols": {
+            "name": "YT Downloader",
+            "schemes": [
+                "swc_ytdownloader"
+            ]
+        }
+    }
+}
