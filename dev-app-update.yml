@@ -1,0 +1,5 @@
+owner: Davis-Software
+repo: YTDownloader
+provider: github
+publishAutoUpdate: true
+updaterCacheDirName: swc_ytdownloader-updater
