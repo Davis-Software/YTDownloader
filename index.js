@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog } = require("electron")
+const { app, BrowserWindow, dialog, ipcMain } = require("electron")
 const { autoUpdater } = require('electron-updater')
 const config = require("./back/config")
 
@@ -35,9 +35,16 @@ function MainWindow () {
 
     win.identifier = "main-window"
     require("./back/update-service")
-    if(!config.devMode) {
+    if(!config.devMode && config.autoUpdate) {
         autoUpdater.checkForUpdates().then()
     }
+
+    ipcMain.handle("window:minimize", _ => {
+        win.minimize()
+    })
+    ipcMain.handle("window:close", _ => {
+        win.close()
+    })
 
     YoutubeDlPackage.checkForUpdate(true).then(ret => {
         if(ret){

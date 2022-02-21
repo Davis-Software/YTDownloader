@@ -3,14 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Yt Downloader</title>
+    <title>YT Downloader</title>
 
     <link rel="stylesheet" href="../static/bootstrap/bootstrap.min.css">
     <script src="../static/bootstrap/bootstrap.bundle.min.js"></script>
 
+    <link rel="stylesheet" href="../static/css/index.css">
     <script src="../static/js/index.js" defer></script>
 </head>
 <body>
+    <div id="window-frame">
+        <div class="frame-logo"> <img src="../static/logo/512x512.png" alt="logo"> <span>YT Downloader</span></div>
+        <div class="frame-drag-section"></div>
+        <div class="frame-controls">
+            <div class="frame-btn" data-action="min">
+                <img class="icon" src="../static/img/frame/min-w-30.png" alt="">
+            </div>
+            <div class="frame-btn close_ico" data-action="close">
+                <img class="icon" src="../static/img/frame/close-w-30.png" alt="">
+            </div>
+        </div>
+    </div>
 
+    <div id="main"></div>
 </body>
 </html>

@@ -8,3 +8,4 @@ exports.iconPath = path.join(__dirname, "..", "static", "logo", "512x512" + (exp
 exports.appDataDir = app.getPath("userData")
 
 exports.devMode = false
+exports.autoUpdate = true

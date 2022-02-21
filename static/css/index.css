@@ -1,0 +1,102 @@
+*{
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+body{
+    margin-top: 32px;
+    height: calc(100vh - 32px);
+}
+
+#window-frame{
+    top: 0;
+    display: block;
+    position: fixed;
+    height: 32px;
+    width: 100%;
+    background: #333333;
+    z-index: 2048;
+}
+#window-frame .frame-logo img{
+    height: 20px;
+    margin-top: 6px;
+    margin-left: 6px;
+}
+#window-frame .frame-logo span{
+    position: absolute;
+    width: max-content;
+    margin-top: 6px;
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 10;
+}
+#window-frame .frame-drag-section{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 32px;
+    -webkit-app-region: drag;
+}
+#window-frame .frame-controls{
+    display: grid;
+    grid-template-columns: repeat(2, 46px);
+    position: absolute;
+    top: 0;
+    right: 0;
+    -webkit-app-region: no-drag;
+}
+#window-frame .frame-btn{
+    grid-row: 1 / span 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 32px;
+    transition: all .15s;
+}
+#window-frame .frame-btn .icon {
+    width: 11px;
+    height: 11px;
+}
+#window-frame .frame-btn:hover{
+    background: #414141;
+    cursor: pointer;
+}
+#window-frame .frame-btn:active{
+    background: #545454;
+}
+#window-frame .frame-btn.close_ico:hover{
+    background: #E81123 !important;
+}
+#window-frame .frame-btn.close_ico:active{
+    background: #F1707A !important;
+}
+
+
+.icon{
+    height: 40px;
+}
+.icon.i-2{
+    height: 80px;
+}
+.icon.round{
+    border-radius: 25px;
+}
+
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+::-webkit-scrollbar-track {
+    background: rgb(102, 102, 102);
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+::selection {
+    background: #3498db;
+}
