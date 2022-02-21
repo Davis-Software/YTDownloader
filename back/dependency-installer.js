@@ -71,6 +71,9 @@ class YoutubeDlDependency extends Dependency{
             })
         })
     }
+    get executor(){
+        return path.join(this.target, this.version === "unix" ? this.files[0] : this.files[1])
+    }
 }
 
 class Ffmpeg extends Dependency{
@@ -90,6 +93,9 @@ class Ffmpeg extends Dependency{
                 resolve(false)
             }
         })
+    }
+    get executor(){
+        return path.join(this.target, this.version === "unix" ? this.files[0] : this.files[1])
     }
 }
 
