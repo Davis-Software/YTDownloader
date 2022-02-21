@@ -100,6 +100,6 @@ fs.mkdirSync(installDir, {
 })
 
 module.exports = {
-    YoutubeDl: new YoutubeDlDependency(installDir),
-    Ffmpeg: new Ffmpeg(installDir)
+    YoutubeDlPackage: new YoutubeDlDependency(installDir),
+    FfmpegPackage: new Ffmpeg(installDir)
 }

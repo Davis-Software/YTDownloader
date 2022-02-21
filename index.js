@@ -2,7 +2,7 @@ const { app, BrowserWindow, dialog } = require("electron")
 const { autoUpdater } = require('electron-updater')
 const config = require("./back/config")
 
-const { YoutubeDl, Ffmpeg} = require("./back/dependency-installer")
+const { YoutubeDlPackage, FfmpegPackage } = require("./back/dependency-installer")
 
 
 if(config.devMode){
@@ -34,7 +34,7 @@ function MainWindow () {
         autoUpdater.checkForUpdates().then()
     }
 
-    YoutubeDl.checkForUpdate(true).then(ret => {
+    YoutubeDlPackage.checkForUpdate(true).then(ret => {
         if(ret){
             dialog.showMessageBox(win, {
                 title: "Update successful",
@@ -42,7 +42,7 @@ function MainWindow () {
             }).then()
         }
     })
-    Ffmpeg.checkForInstall().then()
+    FfmpegPackage.checkForInstall().then()
 
     win.on('focus', () => win.flashFrame(false))
 
