@@ -32,7 +32,8 @@
     },
     "dependencies": {
         "axios": "latest",
-        "electron-updater": "latest"
+        "electron-updater": "latest",
+        "jsdom": "^19.0.0"
     },
     "build": {
         "appId": "org.software-city.projects.ytdownloader",
