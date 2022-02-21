@@ -1,5 +1,7 @@
-const { ipcMain, webContents } = require("electron")
+const { ipcMain } = require("electron")
+const { getMainWindow } = require("./electron-tools")
 
+let win = getMainWindow()
 
 function registerIpcListener(channel, callback, once=false){
     ipcMain.handle(channel, (...resp) => {
@@ -11,7 +13,7 @@ function registerIpcListener(channel, callback, once=false){
 }
 
 function invoke(channel, ...args){
-    webContents.send(channel, ...args)
+    win.webContents.send(channel, ...args)
 }
 
 

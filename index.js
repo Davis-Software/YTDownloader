@@ -3,6 +3,8 @@ const { autoUpdater } = require('electron-updater')
 const config = require("./back/config")
 
 const { YoutubeDlPackage, FfmpegPackage } = require("./back/dependency-installer")
+const downloader = require("./back/downloader")
+const path = require("path");
 
 
 if(config.devMode){
@@ -25,7 +27,10 @@ function MainWindow () {
         height: 720,
         resizable: false,
         darkTheme: true,
-        frame: config.devMode
+        frame: config.devMode,
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js")
+        }
     })
 
     win.identifier = "main-window"
@@ -44,10 +49,12 @@ function MainWindow () {
     })
     FfmpegPackage.checkForInstall().then()
 
-    win.on('focus', () => win.flashFrame(false))
+    downloader.registerListeners()
 
+    win.on('focus', () => win.flashFrame(false))
     win.setIcon(config.iconPath)
-    // win.loadFile("./templates/index.html").then()
+
+    win.loadFile(path.join(__dirname, "templates", "index.html")).then()
 }
 app.whenReady().then(startMain)
 app.on('activate', () => {

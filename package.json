@@ -33,7 +33,9 @@
     "dependencies": {
         "axios": "latest",
         "electron-updater": "latest",
-        "jsdom": "^19.0.0"
+        "jsdom": "^19.0.0",
+        "youtube-dl": "^3.5.0",
+        "youtube-dl-exec": "^2.0.5"
     },
     "build": {
         "appId": "org.software-city.projects.ytdownloader",
