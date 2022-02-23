@@ -1,0 +1,22 @@
+.form-control, .form-select{
+    background-color: #272b30;
+    transition: all .2s;
+    color: white;
+}
+.form-control:active, .form-control:focus, .form-select:active, .form-select:focus{
+    background-color: #31353b;
+    color: white;
+}
+.form-control:disabled, .form-select:disabled{
+    background-color: #272b30 !important;
+    color: #9a9a9a;
+}
+
+.input-group{
+    border: solid 2px #111;
+    border-radius: .25rem;
+}
+
+.btn{
+    transition: all .2s;
+}

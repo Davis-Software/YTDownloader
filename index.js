@@ -45,6 +45,20 @@ function MainWindow () {
     ipcMain.handle("window:close", _ => {
         win.close()
     })
+    ipcMain.handle("window:setProgressBar", (_, value) => {
+        win.setProgressBar(value)
+    })
+    ipcMain.handle("window:flashFrame", (_, value) => {
+        win.flashFrame(value)
+    })
+
+    ipcMain.handle("dialog:showDialog", (event, responder, options) => {
+        dialog.showOpenDialog(win, options).then((canceled, result) => {
+            win.webContents.send(responder, canceled, result)
+        }).catch(err => {
+            win.webContents.send("downloader:error", err)
+        })
+    })
 
     YoutubeDlPackage.checkForUpdate(true).then(ret => {
         if(ret){
@@ -60,6 +74,9 @@ function MainWindow () {
 
     win.on('focus', () => win.flashFrame(false))
     win.setIcon(config.iconPath)
+    if(!config.devMode){
+        win.setMenu(null)
+    }
 
     win.loadFile(path.join(__dirname, "templates", "index.html")).then()
 }

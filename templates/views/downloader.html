@@ -1,1 +1,115 @@
-downloader page wip
+<link rel="stylesheet" href="../static/css/views/downloader.css">
+<script src="../static/js/views/downloader.js"></script>
+
+<div class="pt-2 px-2">
+    <div class="bg-dark input-group">
+        <label class="input-group-text" for="dwn-url-input">Video URL/ID</label>
+        <input type="text" class="form-control" placeholder="https://youtu.be/videoId" id="dwn-url-input">
+        <button class="btn btn-secondary" id="dwn-url-paste">Paste</button>
+        <button class="btn btn-primary" id="dwn-url-apply">Apply</button>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="messagebox">
+        <h5></h5>
+        <p></p>
+        <button class="btn btn-sm btn-warning">Dismiss</button>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="settings">
+        <h3 class="text-center mt-4">Welcome to the SWC YouTube Downloader</h3>
+        <hr>
+        <p class="ms-3 mt-5">
+            With this new version you can now not only download from YouTube, but in fact from
+            any other site that youtube-dl supports.
+        </p>
+        <p class="ms-3">
+            Additionally youtube-dl is now also automatically updated!
+            <br>So you will probably (hopefully) never run into download problems related to old yt-dl versions.
+        </p>
+        <p class="mt-5 ms-5 text-info">
+            In the future you will be able to select some default parameters for the downloading precess right here. <br>
+            For now this is obviously just a simple welcome page.
+            <br><br>
+        </p>
+        <p class="mt-5 ms-5">
+            -- YTDownloader developed by Davis_Software
+        </p>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="loader" class="page-loader">
+        <div class="shadow"></div>
+        <div class="box"></div>
+        <div class="text">Loading video info</div>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="video-preview">
+        <div class="part">
+            <img id="video-thumbnail" src="" alt="">
+            <h4 id="video-title">Video title</h4>
+            <hr>
+            <div id="video-info">
+                Creator: &nbsp;&nbsp; <span id="video-creator"></span> <br>
+                Likes: &nbsp;&nbsp; <span id="video-likes"></span> <br>
+                Views: &nbsp;&nbsp; <span id="video-views"></span>
+            </div>
+        </div>
+        <div class="part">
+            <div id="video-description">video description</div>
+            <div id="video-categories"></div>
+            <hr>
+            <div id="format-selector">
+                <label for="format-selector-video">Select a download format:</label>
+                <select class="form-select" id="format-selector-video">
+                    <option disabled selected>Please select a video format</option>
+                    <optgroup label="Presets">
+                        <option value="preset-max-audio">Auto - max audio</option>
+                        <option value="preset-max-video">Auto - max video</option>
+                        <option value="preset-max">Auto - max audio & video</option>
+                    </optgroup>
+                    <optgroup label="All"></optgroup>
+                </select>
+                <p id="format-info" class="mt-1"></p>
+            </div>
+
+            <button id="video-preview-continue" class="btn btn-primary">Continue -></button>
+        </div>
+    </div>
+</div>
+
+<div class="collapse">
+    <div id="video-download">
+        <div class="input-group">
+            <label for="output-filetype-select" class="input-group-text solid-label-width">Output filetype</label>
+            <select class="form-select" id="output-filetype-select">
+                <option disabled selected>Please select an output filetype</option>
+                <optgroup label="Video">
+                    <option value="mp4">MP4</option>
+                    <option value="webm">WebM</option>
+                    <option value="mov">MOV</option>
+                </optgroup>
+                <optgroup label="Audio">
+                    <option value="mp3">MP3</option>
+                    <option value="wav">WAV</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="input-group mt-2">
+            <label for="output-location-selector" class="input-group-text solid-label-width">Output folder location</label>
+            <input id="output-location-selector" class="form-control" type="text" placeholder="No path selected" disabled>
+            <button class="btn btn-primary">Browse</button>
+        </div>
+
+        <div id="download-options" class="mt-3">
+            <button id="download-options-back" class="btn btn-secondary"><- Back</button>
+            <button id="download-options-start" class="btn btn-primary">Download</button>
+        </div>
+    </div>
+</div>

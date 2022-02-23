@@ -25,6 +25,7 @@ function loadPage(page){
                 if(elem.getAttribute("rel") !== "stylesheet") return
 
                 link.setAttribute("href", elem.getAttribute("href"))
+                link.setAttribute("rel", "stylesheet")
 
                 link.setAttribute("data-loaded-from", page)
                 document.head.append(link)
