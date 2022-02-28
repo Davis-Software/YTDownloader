@@ -10,7 +10,9 @@ function registerIpcListener(channel, callback, once=false){
 }
 
 function invoke(channel, ...args){
-    webContents.getFocusedWebContents().send(channel, ...args)
+    webContents.getAllWebContents().forEach(webContent => {
+        webContent.send(channel, ...args)
+    })
 }
 
 

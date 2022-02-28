@@ -102,14 +102,70 @@
             </select>
         </div>
         <div class="input-group mt-2">
-            <label for="output-location-selector" class="input-group-text solid-label-width">Output folder location</label>
+            <label for="output-location-selector" class="input-group-text solid-label-width">Output location</label>
             <input id="output-location-selector" class="form-control" type="text" placeholder="No path selected" disabled>
             <button class="btn btn-primary">Browse</button>
         </div>
 
-        <div id="download-options" class="mt-3">
-            <button id="download-options-back" class="btn btn-secondary"><- Back</button>
-            <button id="download-options-start" class="btn btn-primary">Download</button>
+        <div class="collapse expand-collapse">
+            <div id="download-options">
+                <div class="d-flex">
+                    <div class="w-50 pe-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="download-options-custom-filename">
+                            <label class="form-check-label" for="download-options-custom-filename">Custom Filename</label>
+                        </div>
+                        <div class="collapse">
+                            <input type="text" class="form-control" id="download-options-custom-filename-input" placeholder="Filename">
+                        </div>
+                    </div>
+                    <div  class="w-50 pe-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="download-options-songMode">
+                            <label class="form-check-label" for="download-options-songMode">Song Mode (Apply metadata to file)</label>
+                        </div>
+                        <div class="collapse">
+                            <input type="text" class="form-control" id="download-options-songMode-artist" placeholder="Artist">
+                            <input type="text" class="form-control" id="download-options-songMode-title" placeholder="Title">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="download-options-songMode-filename">
+                                <label class="form-check-label" for="download-options-songMode-filename">Affects filename</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="download-options-thumbnail">
+                    <label class="form-check-label" for="download-options-thumbnail">Apply Thumbnail</label>
+                </div>
+                <div class="collapse">
+                    <div class="d-flex">
+                        <img src="" id="download-options-thumbnail-preview">
+                        <div class="flex-grow-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="download-options-custom-thumbnail">
+                                <label class="form-check-label" for="download-options-custom-thumbnail">Custom Thumbnail</label>
+                            </div>
+                            <button class="btn btn-info" id="download-options-custom-thumbnail-input">Select image</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="download-options-back" class="btn btn-secondary"><- Back</button>
+                <button id="download-options-start" class="btn btn-primary">Download</button>
+            </div>
+        </div>
+        <div class="collapse expand-collapse">
+            <div id="download-progress">
+                <div id="download-progress-bar" class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <div class="mb-5 mt-2" id="download-progress-info"></div>
+                <button class="btn btn-warning w-100" id="download-abort">Abort Download</button>
+            </div>
         </div>
     </div>
 </div>

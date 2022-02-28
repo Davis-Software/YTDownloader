@@ -134,9 +134,41 @@
     width: 180px;
     text-align: center;
 }
-#video-download #download-options{
-    margin: 10px;
+.expand-collapse{
+    height: 100%;
+}
+#download-options{
+    position: relative;
     border-radius: .25rem;
-    height: 80%;
     background-color: #272b30;
+    margin: 20px 10px 10px;
+    padding: 10px 15px;
+    height: 440px;
+}
+#download-options .form-control{
+    background: #171d23;
+}
+#download-options-thumbnail-preview{
+    width: 25%;
+    border-radius: .25rem;
+    object-fit: cover;
+    margin: 5px 10px 0;
+}
+#download-options #download-options-back{
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+}
+#download-options #download-options-start{
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}
+
+#download-progress{
+    position: relative;
+    border-radius: .25rem;
+    background-color: #272b30;
+    margin: 20px 10px 10px;
+    padding: 10px 15px;
 }

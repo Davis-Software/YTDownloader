@@ -3,11 +3,13 @@ const { create } = require("youtube-dl-exec")
 const { execFile } = require("child_process")
 const { registerIpcListener, invoke } = require("./ipc-handler")
 const { appDataDir } = require("./config")
+const { downloadRequest } = require("./requests")
 const path = require("path")
 const fs = require("fs")
 
 
 const youtubeDl = create(YoutubeDlPackage.executor)
+let currentProcess
 
 
 function makeError(err){
@@ -26,15 +28,23 @@ function makeError(err){
         killed: err.killed
     }
 }
+function killProcess(){
+    if(currentProcess){
+        currentProcess.kill()
+    }
+}
 
 
 class YoutubeDlVideo{
     constructor(url) {
         this.url = url
-        this.target = path.join(appDataDir, "targets")
+        this.tempTarget = path.join(appDataDir, "targets")
+        this.lastTarget = ""
+        this.target = ""
         this._downloaded = false
+        this.targetFormat = ""
 
-        fs.mkdirSync(this.target, {
+        fs.mkdirSync(this.tempTarget, {
             recursive: true
         })
     }
@@ -46,49 +56,130 @@ class YoutubeDlVideo{
             noCheckCertificate: true
         })
     }
-    download(format, target, fileType){
-        invoke("downloader:progress:reset")
-        invoke("downloader:progress:info", "Gathering video information...")
-        invoke("downloader:progress:mode", "unstable")
-        this.getInfo().then(info => {
-            const ytDownload = execFile(YoutubeDlPackage.executor, [
-                "-f", format,
-                "-o", target + `\\out.${fileType}`,
-                "--merge-output-format", fileType,
-                "--ffmpeg-location", FfmpegPackage.executor,
-                this.url
-            ])
+    download(format, target, fileType, callback){
+        invoke("downloader:progress:info", "Starting download...")
+        invoke("downloader:progress:mode", "stable")
+        this.target = target
+        this.targetFormat = fileType
+        this.lastTarget = "download-converted." + this.targetFormat
 
-            ytDownload.stdout.on("data", data => {
-                let output = data.trim().split(" ").filter(n => n)
-                if (output[0] === '[download]' && parseFloat(output[1])){
-                    invoke("downloader:progress:data", {
-                        progress: parseFloat(output[1]),
-                        size: output[3],
-                        transferred: output[5],
-                        estimated: output[7]
-                    })
-                }
-                console.log(data)
-            })
-            ytDownload.stdout.on('end', data => {
-                console.log('stdout end', data)
-            })
-            ytDownload.stdout.on('close', data => {
-                console.log('stdout close', data)
-            });
-            ytDownload.stderr.on('end', data => {
-                console.log('end', data)
-            })
-            ytDownload.stderr.on('close', data => {
-                console.log('close', data)
-            })
-            ytDownload.stderr.on('data', data => {
-                console.log('data', data)
-            })
-        }).catch(err => {
-            invoke("downloader:error", makeError(err))
+        const ytDownload = execFile(YoutubeDlPackage.executor, [
+            "-f", format,
+            "-o", path.join(this.tempTarget, this.lastTarget),
+            "--merge-output-format", fileType,
+            "--ffmpeg-location", FfmpegPackage.executor,
+            this.url
+        ])
+        currentProcess = ytDownload
+
+        ytDownload.stdout.on("data", data => {
+            let output = data.trim().split(" ").filter(n => n)
+            if (output[0] === '[download]' && parseFloat(output[1])){
+                invoke("downloader:progress:data", {
+                    progress: parseFloat(output[1]),
+                    size: output[3],
+                    speed: output[5],
+                    estimated: output[7],
+                    transferred: parseFloat(output[3]) * (parseFloat(output[1]) / 100)
+                })
+            }
         })
+
+        ytDownload.stdout.on('close', _ => {
+            this._downloaded = true
+            callback()
+        })
+        ytDownload.stderr.on('data', data => {
+            invoke("downloader:error", data)
+        })
+    }
+    applyMetadata(data, callback){
+        if(!this._downloaded) return
+
+        invoke("downloader:progress:info", "Applying metadata...")
+        invoke("downloader:progress:mode", "unstable")
+
+        let convTarget = String(this.lastTarget)
+        this.lastTarget = "download-metadata." + this.targetFormat
+        let options = [
+            "-y",
+            "-i", path.join(this.tempTarget, convTarget),
+            "-map_metadata", "0"
+        ]
+        for(let key in data){
+            options.push("-metadata")
+            options.push(`${key}=${data[key]}`)
+        }
+        options.push(path.join(this.tempTarget, this.lastTarget))
+        const convert = execFile(FfmpegPackage.executor, options)
+        convert.addListener("error", err => {
+            invoke("downloader:error", err)
+        })
+        convert.addListener("close", _ => {
+            callback()
+        })
+    }
+    applyThumbnail(thumbPath, callback){
+        if(!this._downloaded) return
+
+        invoke("downloader:progress:info", "Applying thumbnail...")
+        invoke("downloader:progress:mode", "unstable")
+
+        let metaTarget = String(this.lastTarget)
+        this.lastTarget = "download-thumbnail." + this.targetFormat
+        let options = [
+            "-y",
+            "-i", path.join(this.tempTarget, metaTarget),
+            "-i", thumbPath,
+            "-map", "0",
+            "-map", "1",
+            "-c:v:1", "png",
+            "-disposition:v:1", "attached_pic",
+            path.join(this.tempTarget, this.lastTarget)
+        ]
+        const convert = execFile(FfmpegPackage.executor, options)
+        convert.addListener("error", err => {
+            invoke("downloader:error", err)
+        })
+        convert.addListener("close", _ => {
+            callback()
+        })
+    }
+    downloadThumbnail(url, callback){
+        invoke("downloader:progress:info", "Downloading thumbnail...")
+        invoke("downloader:progress:mode", "unstable")
+        downloadRequest(url, path.join(this.tempTarget, "thumb.png")).then(_ => {
+            this.applyThumbnail(path.join(this.tempTarget, "thumb.png"), callback)
+        })
+    }
+    copyToEndTarget(callback){
+        invoke("downloader:progress:info", "Copying to final location...")
+        invoke("downloader:progress:mode", "unstable")
+        fs.copyFile(
+            path.join(this.tempTarget, this.lastTarget),
+            this.target,
+            callback
+        )
+    }
+    cleanup(){
+        invoke("downloader:progress:info", "Done")
+        invoke("downloader:progress:mode", "stable")
+
+        if(!this._downloaded) return
+        if(fs.existsSync(path.join(this.tempTarget, "download-converted." + this.targetFormat))){
+            fs.rm(path.join(this.tempTarget, "download-converted." + this.targetFormat), _ => {})
+        }
+        if(fs.existsSync(path.join(this.tempTarget, "download-metadata." + this.targetFormat))){
+            fs.rm(path.join(this.tempTarget, "download-metadata." + this.targetFormat), _ => {})
+        }
+        if(fs.existsSync(path.join(this.tempTarget, "download-thumbnail." + this.targetFormat))){
+            fs.rm(path.join(this.tempTarget, "download-thumbnail." + this.targetFormat), _ => {})
+        }
+        if(fs.existsSync(path.join(this.tempTarget, "thumb.png"))){
+            fs.rm(path.join(this.tempTarget, "thumb.png"), _ => {})
+        }
+
+        invoke("downloader:progress:downloadComplete")
     }
 }
 
@@ -101,9 +192,45 @@ function registerListeners() {
             invoke("downloader:error", makeError(err))
         })
     })
-    registerIpcListener("downloader:startDownload", (_, url, format, target, fileType) => {
+    registerIpcListener("downloader:startDownload", (_, url, format, target, fileType, metadata, thumbnail) => {
         let video = new YoutubeDlVideo(url)
-        video.download(format, target, fileType)
+
+        function end(){
+            video.copyToEndTarget(_ => {
+                video.cleanup()
+            })
+        }
+        function applyThumbnail(){
+            if(thumbnail){
+                if(thumbnail.external){
+                    video.downloadThumbnail(thumbnail.link, _ => {
+                        end()
+                    })
+                }else{
+                    video.applyThumbnail(thumbnail.link, _ => {
+                        end()
+                    })
+                }
+            }else{
+                end()
+            }
+        }
+        function applyMetadata(){
+            if(metadata){
+                video.applyMetadata(metadata, _ => {
+                    applyThumbnail()
+                })
+            }else{
+                applyThumbnail()
+            }
+        }
+
+        video.download(format, target, fileType, _ => {
+            applyMetadata()
+        })
+    })
+    registerIpcListener("downloader:kill", _ => {
+        killProcess()
     })
 }
 

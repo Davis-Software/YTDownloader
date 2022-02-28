@@ -11,6 +11,9 @@
     background-color: #272b30 !important;
     color: #9a9a9a;
 }
+input[type=checkbox]{
+    transition: all .2s;
+}
 
 .input-group{
     border: solid 2px #111;
