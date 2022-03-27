@@ -151,8 +151,10 @@
 #download-options-thumbnail-preview{
     width: 25%;
     border-radius: .25rem;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: top center;
     margin: 5px 10px 0;
+    height: 120px;
 }
 #download-options #download-options-back{
     position: absolute;
