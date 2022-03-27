@@ -10,6 +10,7 @@ const fs = require("fs")
 
 const youtubeDl = create(YoutubeDlPackage.executor)
 let currentProcess
+let aborted
 
 
 function makeError(err){
@@ -31,6 +32,7 @@ function makeError(err){
 function killProcess(){
     if(currentProcess){
         currentProcess.kill()
+        aborted = true
     }
 }
 
@@ -86,11 +88,31 @@ class YoutubeDlVideo{
         })
 
         ytDownload.stdout.on('close', _ => {
-            this._downloaded = true
-            callback()
+            if(aborted){
+                invoke("downloader:progress:downloadAborted")
+                aborted = false
+            }else {
+                this._downloaded = true
+                callback()
+            }
         })
         ytDownload.stderr.on('data', data => {
             invoke("downloader:error", data)
+        })
+    }
+    static ffMpegProcess(options, callback){
+        const convert = execFile(FfmpegPackage.executor, options)
+        currentProcess = convert
+        convert.addListener("error", err => {
+            invoke("downloader:error", err)
+        })
+        convert.addListener("close", _ => {
+            if(aborted){
+                invoke("downloader:progress:downloadAborted")
+                aborted = false
+            }else{
+                callback()
+            }
         })
     }
     applyMetadata(data, callback){
@@ -111,13 +133,7 @@ class YoutubeDlVideo{
             options.push(`${key}=${data[key]}`)
         }
         options.push(path.join(this.tempTarget, this.lastTarget))
-        const convert = execFile(FfmpegPackage.executor, options)
-        convert.addListener("error", err => {
-            invoke("downloader:error", err)
-        })
-        convert.addListener("close", _ => {
-            callback()
-        })
+        YoutubeDlVideo.ffMpegProcess(options, callback)
     }
     applyThumbnail(thumbPath, callback){
         if(!this._downloaded) return
@@ -137,13 +153,7 @@ class YoutubeDlVideo{
             "-disposition:v:1", "attached_pic",
             path.join(this.tempTarget, this.lastTarget)
         ]
-        const convert = execFile(FfmpegPackage.executor, options)
-        convert.addListener("error", err => {
-            invoke("downloader:error", err)
-        })
-        convert.addListener("close", _ => {
-            callback()
-        })
+        YoutubeDlVideo.ffMpegProcess(options, callback)
     }
     downloadThumbnail(url, callback){
         invoke("downloader:progress:info", "Downloading thumbnail...")

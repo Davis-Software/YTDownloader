@@ -548,6 +548,22 @@ window.downloader.on("progress:downloadComplete", _ => {
     downloadProgressAbortButton.disabled = true
     downloadProgressInfo.textContent = "Download finished"
 })
+downloadProgressAbortButton.addEventListener("click", _ => {
+    if(downloadProgressAbortButton.classList.contains("btn-info")){
+        downloadProgressAbortButton.classList.replace("btn-info", "btn-warning")
+        downloadProgressAbortButton.textContent = "Abort Download"
+        downloadProgressCollapse.hide()
+        downloadOptionsCollapse.show()
+    }else {
+        window.downloader.killDownload()
+    }
+})
+window.downloader.on("progress:downloadAborted", _ => {
+    window.controls.setProgressBar(0)
+    downloadProgressAbortButton.classList.replace("btn-warning", "btn-info")
+    downloadProgressAbortButton.textContent = "Go Back"
+    downloadProgressInfo.textContent = "Download aborted"
+})
 
 
 
