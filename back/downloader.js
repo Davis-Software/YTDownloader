@@ -13,6 +13,12 @@ let currentProcess
 let aborted
 
 
+function log(msg, tag="prim"){
+    invoke("downloader:progress:log", {
+        message: msg,
+        tag
+    })
+}
 function makeError(err){
     return{
         shortMessage: err.shortMessage,
@@ -59,6 +65,9 @@ class YoutubeDlVideo{
         })
     }
     download(format, target, fileType, callback){
+        log("Initialized downloader components...")
+        log("Starting to download...")
+
         invoke("downloader:progress:info", "Starting download...")
         invoke("downloader:progress:mode", "stable")
         this.target = target
@@ -75,6 +84,8 @@ class YoutubeDlVideo{
         currentProcess = ytDownload
 
         ytDownload.stdout.on("data", data => {
+            log(data, "info")
+
             let output = data.trim().split(" ").filter(n => n)
             if (output[0] === '[download]' && parseFloat(output[1])){
                 invoke("downloader:progress:data", {
@@ -86,25 +97,27 @@ class YoutubeDlVideo{
                 })
             }
         })
-
         ytDownload.stdout.on('close', _ => {
             if(aborted){
+                log("Download Aborted by user", "warn")
                 invoke("downloader:progress:downloadAborted")
                 aborted = false
             }else {
+                log("Download process completed")
                 this._downloaded = true
                 callback()
             }
         })
+
         ytDownload.stderr.on('data', data => {
-            invoke("downloader:error", data)
+            log(data, "err")
         })
     }
     static ffMpegProcess(options, callback){
         const convert = execFile(FfmpegPackage.executor, options)
         currentProcess = convert
         convert.addListener("error", err => {
-            invoke("downloader:error", err)
+            log(err, "warn")
         })
         convert.addListener("close", _ => {
             if(aborted){
@@ -118,6 +131,7 @@ class YoutubeDlVideo{
     applyMetadata(data, callback){
         if(!this._downloaded) return
 
+        log("Applying metadata to file")
         invoke("downloader:progress:info", "Applying metadata...")
         invoke("downloader:progress:mode", "unstable")
 
@@ -138,6 +152,7 @@ class YoutubeDlVideo{
     applyThumbnail(thumbPath, callback){
         if(!this._downloaded) return
 
+        log("Applying thumbnail to file")
         invoke("downloader:progress:info", "Applying thumbnail...")
         invoke("downloader:progress:mode", "unstable")
 
@@ -156,13 +171,16 @@ class YoutubeDlVideo{
         YoutubeDlVideo.ffMpegProcess(options, callback)
     }
     downloadThumbnail(url, callback){
+        log(`Downloading thumbnail from remote: ${url}`)
         invoke("downloader:progress:info", "Downloading thumbnail...")
         invoke("downloader:progress:mode", "unstable")
         downloadRequest(url, path.join(this.tempTarget, "thumb.png")).then(_ => {
+            log("Thumbnail download completed")
             this.applyThumbnail(path.join(this.tempTarget, "thumb.png"), callback)
         })
     }
     copyToEndTarget(callback){
+        log("Copying file to target location")
         invoke("downloader:progress:info", "Copying to final location...")
         invoke("downloader:progress:mode", "unstable")
         fs.copyFile(
@@ -172,6 +190,7 @@ class YoutubeDlVideo{
         )
     }
     cleanup(){
+        log("All done - cleaning up temporary files")
         invoke("downloader:progress:info", "Done")
         invoke("downloader:progress:mode", "stable")
 

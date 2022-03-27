@@ -58,6 +58,7 @@ const downloadProgressCollapse = new bootstrap.Collapse(downloadProgress.parentE
 const downloadProgressBar = document.querySelector("#download-progress-bar .progress-bar")
 const downloadProgressInfo = document.querySelector("#download-progress-info")
 const downloadProgressAbortButton = document.querySelector("#download-abort")
+const downloadProgressLog = document.querySelector("#download-log ul")
 
 let applied = false
 let videoInfoData
@@ -563,6 +564,13 @@ window.downloader.on("progress:downloadAborted", _ => {
     downloadProgressAbortButton.classList.replace("btn-warning", "btn-info")
     downloadProgressAbortButton.textContent = "Go Back"
     downloadProgressInfo.textContent = "Download aborted"
+})
+window.downloader.on("progress:log", (_, data) => {
+    let logElem = document.createElement("li")
+    logElem.textContent = data.message
+    logElem.classList.add(data.tag)
+    downloadProgressLog.append(logElem)
+    downloadProgressLog.scrollTo(0, downloadProgressLog.scrollHeight)
 })
 
 
