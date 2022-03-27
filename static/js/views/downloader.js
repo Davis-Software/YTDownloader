@@ -60,6 +60,9 @@ const downloadProgressInfo = document.querySelector("#download-progress-info")
 const downloadProgressAbortButton = document.querySelector("#download-abort")
 const downloadProgressLog = document.querySelector("#download-log ul")
 
+// windows RegEx for filename checking
+const fileNameFormat = /^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:";|/]+$/
+
 let applied = false
 let videoInfoData
 
@@ -266,8 +269,8 @@ window.downloader.on("returnInfo", (_, info) => {
     // DownloadOptions
     downloadOptionsCustomFilenameInput.value = info?.title || ""
     if((info?.title || "").includes("-")){
-        downloadOptionsSongModeArtistInput.value = info.title.split("-")[0]
-        downloadOptionsSongModeTitleInput.value = info.title.split("-")[1]
+        downloadOptionsSongModeArtistInput.value = info.title.split("-")[0].trim()
+        downloadOptionsSongModeTitleInput.value = info.title.split("-")[1].trim()
     }else{
         downloadOptionsSongModeArtistInput.value = isYoutube()
             ? info.channel
@@ -395,14 +398,22 @@ function updateDownloadOutputLocation(){
     if(downloadOptionsCustomFilenameCheckbox.checked){
         downloadOptionsSongModeAffectsFileName.disabled = true
         downloadOptionsSongModeAffectsFileName.checked = false
-        addition = downloadOptionsCustomFilenameInput.value
+        addition = downloadOptionsCustomFilenameInput.value.trim()
     }else if(
         downloadOptionsSongModeCheckbox.checked
         && (downloadOptionsSongModeAffectsFileName.checked || downloadOptionsSongModeAffectsFileName.disabled)
     ){
         downloadOptionsSongModeAffectsFileName.disabled = false
         downloadOptionsSongModeAffectsFileName.checked = true
-        addition = `${downloadOptionsSongModeArtistInput.value} - ${downloadOptionsSongModeTitleInput.value}`
+        addition = `${downloadOptionsSongModeArtistInput.value.trim()} - ${downloadOptionsSongModeTitleInput.value.trim()}`
+    }
+
+    if(!fileNameFormat.test(addition)){
+        outputLocationInput.classList.add("text-danger")
+        downloadOptionsStart.disabled = true
+    }else{
+        outputLocationInput.classList.remove("text-danger")
+        downloadOptionsStart.disabled = false
     }
 
     addition += `.${selectedDownloadOutputFileType}`
