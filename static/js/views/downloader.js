@@ -524,6 +524,7 @@ window.downloader.on("progress:mode", (_, mode) => {
         case "unstable":
             downloadProgressBar.style.width = "100%"
             downloadProgressBar.classList.add("progress-bar-striped", "progress-bar-animated", "bg-info")
+            window.controls.setProgressBar(2)
             break
         case "stable":
         default:
@@ -540,8 +541,10 @@ window.downloader.on("progress:data", (_, data) => {
             Downloading with ${data.speed}
             Estimated time left: ${data.estimated}
         `
+    window.controls.setProgressBar(data.progress/100)
 })
 window.downloader.on("progress:downloadComplete", _ => {
+    window.controls.setProgressBar(0)
     downloadProgressAbortButton.disabled = true
     downloadProgressInfo.textContent = "Download finished"
 })
