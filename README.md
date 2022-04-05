@@ -1,5 +1,16 @@
 # YouTube Video Downloader
-> Now with a new awesome looking UI design!
+
+> Developed by [Davis_Software](https://github.com/Davis-Software) &copy; 2022
+
+> The Recode: Now with a new awesome looking UI design!
+> 
+> Video info preview and easy/automatic format selection
+> ![](.github/img/preview1.png)
+> 
+> Optimized for audio downloads with ability to add custom metadata and a thumbnail
+> ![](.github/img/preview2.png)
+> 
+> #### And best of all... many UI animations and ripple effects!
 
 # Features
 - High Quality Download
