@@ -59,6 +59,34 @@ function loadPage(page){
         })
     }
 
+    // listener stuff
+    window.ipc.update.onInfo((_, info) => {
+        let modal = new Modal(null, {
+            title: `New Update Available: Version ${info.version}`,
+            close_button: {
+                type: "info",
+                text: "OK"
+            },
+            centered: true,
+            scrollable: true
+        }, "large")
+        modal.Custom(info.releaseNotes).querySelectorAll("a").forEach(link => {
+            link.addEventListener("click", e => {
+                e.preventDefault()
+                window.open(link.href, "_blank")
+            })
+        })
+        modal.Text(
+            "auto-update-info-text",
+            "span",
+            "The update will be downloaded in the background automatically!",
+            "text-info position-absolute start-0 ps-3",
+            {},
+            true
+        )
+        modal.show()
+    })
+
     // General init
     if(window.hasOwnProperty("identifier") && window.identifier === "dialog"){
         if(!window.hasOwnProperty("dialogType")) return

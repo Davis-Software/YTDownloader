@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld("utils", {
 contextBridge.exposeInMainWorld("ipc", {
     debug: {on: (channel, listener) => {
         ipcRenderer.on(`debug:${channel}`, listener)
+    }},
+    update: {onInfo: listener => {
+            ipcRenderer.on("update:info", listener)
     }}
 })
 contextBridge.exposeInMainWorld("controls", {

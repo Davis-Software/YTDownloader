@@ -1,5 +1,6 @@
 const { dialog } = require("electron")
 const { getMainWindow } = require("./electron-tools")
+const { invoke } = require("./ipc-handler")
 const { autoUpdater } = require('electron-updater')
 
 
@@ -9,9 +10,7 @@ autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = true
 
 function update_available(info){
-    dialog.showMessageBox(win, {
-        message: `There is a new update available: ${info.version}\n\n${info.releaseNotes}\n\nIt will be downloaded automatically!`
-    }).then()
+    invoke("update:info", info)
 }
 function update_not_available(info){
     console.info(`No update available. - Currently running latest on ${info.version}`)
@@ -35,3 +34,5 @@ autoUpdater.on("update-available", update_available)
 autoUpdater.on("update-not-available", update_not_available)
 autoUpdater.on("update-downloaded", update_downloaded)
 autoUpdater.on("error", update_error)
+
+exports.update_available = update_available
