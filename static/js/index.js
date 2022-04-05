@@ -60,5 +60,10 @@ function loadPage(page){
     }
 
     // General init
-    loadPage("downloader")
+    if(window.hasOwnProperty("identifier") && window.identifier === "dialog"){
+        if(!window.hasOwnProperty("dialogType")) return
+        loadPage(window.dialogType)
+    }else{
+        loadPage("downloader")
+    }
 })()
