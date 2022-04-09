@@ -22,6 +22,13 @@ class Dependency{
             })
         }
     }
+    makeExecutable(filepath, callback){
+        if(this.version === "unix") {
+            fs.chmod(filepath, "+x", callback)
+            return
+        }
+        callback()
+    }
     get config(){
         return JSON.parse(fs.readFileSync(this.configFile, {
             encoding: "utf-8"
@@ -63,7 +70,9 @@ class YoutubeDlDependency extends Dependency{
 
                     this.setConfigVal("tag", tag)
                     requests.downloadRequest(url, path.join(this.target, file)).then(_ => {
-                        resolve(tag)
+                        this.makeExecutable(path.join(this.target, file), () => {
+                            resolve(tag)
+                        })
                     })
                 }else{
                     resolve(false)
@@ -88,7 +97,11 @@ class Ffmpeg extends Dependency{
             let file = this.version === "unix" ? this.files[0] : this.files[1]
             let fPath = path.join(this.target, file)
             if(!fs.existsSync(fPath)){
-                fs.copyFile(path.join(this.savedLocation, file), fPath, resolve)
+                fs.copyFile(path.join(this.savedLocation, file), fPath, () => {
+                    this.makeExecutable(path.join(this.target, file), () => {
+                        resolve(true)
+                    })
+                })
             }else{
                 resolve(false)
             }
