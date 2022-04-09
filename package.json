@@ -11,7 +11,7 @@
         "url": "https://github.com/Davis-Software/YTDownloader"
     },
     "name": "swc_ytdownloader",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "description": "Download and convert Videos from YouTube",
     "repository": "https://github.com/Davis-Software/YTDownloader",
     "license": "MIT",
