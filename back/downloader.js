@@ -79,6 +79,7 @@ class YoutubeDlVideo{
             "-o", path.join(this.tempTarget, this.lastTarget),
             "--merge-output-format", fileType,
             "--ffmpeg-location", FfmpegPackage.executor,
+            "--audio-quality", "0",
             this.url
         ])
         currentProcess = ytDownload

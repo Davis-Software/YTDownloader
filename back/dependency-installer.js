@@ -38,8 +38,10 @@ class YoutubeDlDependency extends Dependency{
     constructor(target) {
         super("yt_dl", target)
 
-        this.url = "https://github.com/ytdl-org/youtube-dl/releases/latest"
-        this.files = ["youtube-dl", "youtube-dl.exe"]
+        // this.url = "https://github.com/ytdl-org/youtube-dl/releases/latest"
+        // this.files = ["youtube-dl", "youtube-dl.exe"]
+        this.url = "https://github.com/yt-dlp/yt-dlp/releases/latest"
+        this.files = ["yt-dlp", "yt-dlp.exe"]
     }
     _getLatestTag(callback){
         requests.getRequest(this.url).then(resp => {
