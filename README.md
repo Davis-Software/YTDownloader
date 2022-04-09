@@ -2,6 +2,12 @@
 
 > Developed by [Davis_Software](https://github.com/Davis-Software) &copy; 2022
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Davis-Software/YTDownloader?style=for-the-badge)
+![GitHub issues](https://img.shields.io/github/issues-raw/Davis-Software/YTDownloader?style=for-the-badge)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/Davis-Software/YTDownloader?style=for-the-badge)
+![GitHub all releases](https://img.shields.io/github/downloads/Davis-Software/YTDownloader/total?style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/Davis-Software/YTDownloader?style=for-the-badge)
+
 > The Recode: Now with a new awesome looking UI design!
 > 
 > Video info preview and easy/automatic format selection
