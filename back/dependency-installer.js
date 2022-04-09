@@ -23,11 +23,7 @@ class Dependency{
         }
     }
     makeExecutable(filepath, callback){
-        if(this.version === "unix") {
-            fs.chmod(filepath, "+x", callback)
-            return
-        }
-        callback()
+        fs.chmod(filepath, "0500", callback)
     }
     get config(){
         return JSON.parse(fs.readFileSync(this.configFile, {
