@@ -34,6 +34,7 @@
         "axios": "latest",
         "electron-updater": "^4.0.0",
         "jsdom": "^19.0.0",
+        "node-stream-zip": "^1.15.0",
         "youtube-dl-exec": "^2.0.5"
     },
     "build": {
