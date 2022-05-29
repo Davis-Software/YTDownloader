@@ -3,6 +3,7 @@ const requests = require("./requests")
 const fs = require("fs")
 const path = require("path")
 const { JSDOM } = require("jsdom")
+const StreamZip = require('node-stream-zip');
 
 
 class Dependency{
@@ -41,8 +42,8 @@ class YoutubeDlDependency extends Dependency{
     constructor(target) {
         super("yt_dl", target)
 
-        this.url = "https://github.com/ytdl-org/youtube-dl/releases/latest"
-        this.files = ["youtube-dl", "youtube-dl.exe"]
+        this.url = "https://github.com/yt-dlp/yt-dlp/releases/latest"
+        this.files = ["yt-dlp", "yt-dlp.exe"]
     }
     _getLatestTag(callback){
         requests.getRequest(this.url).then(resp => {
@@ -64,9 +65,9 @@ class YoutubeDlDependency extends Dependency{
                     url.push("download", tag, file)
                     url = url.join("/")
 
-                    this.setConfigVal("tag", tag)
                     requests.downloadRequest(url, path.join(this.target, file)).then(_ => {
                         this.makeExecutable(path.join(this.target, file), () => {
+                            this.setConfigVal("tag", tag)
                             resolve(tag)
                         })
                     })
@@ -85,22 +86,78 @@ class Ffmpeg extends Dependency{
     constructor(target) {
         super("ffmpeg", target)
 
-        this.savedLocation = "./tools"
+        this.url = "https://github.com/yt-dlp/FFmpeg-Builds/releases/latest"
         this.files = ["ffmpeg", "ffmpeg.exe"]
     }
-    checkForInstall(){
-        return new Promise(resolve => {
-            let file = this.version === "unix" ? this.files[0] : this.files[1]
-            let fPath = path.join(this.target, file)
-            if(!fs.existsSync(fPath)){
-                fs.copyFile(path.join(this.savedLocation, file), fPath, () => {
-                    this.makeExecutable(path.join(this.target, file), () => {
-                        resolve(true)
-                    })
-                })
+    _getLatestTag(callback){
+        requests.getRequest(this.url).then(resp => {
+            let document = new JSDOM(resp.data).window.document
+            let tag = document.querySelector("div a code.f5").textContent
+                .replaceAll(" ", "")
+                .replaceAll("\n", "")
+            callback(tag)
+        })
+    }
+    checkForUpdate(download){
+        const unzipWin = (downloadLoc, outLoc, callback) => {
+            let zip = new StreamZip({
+                file: downloadLoc,
+                storeEntries: true
+            })
+            zip.on("ready", () => {
+                for(let entry in zip.entries()){
+                    if(entry.includes(this.files[1])){
+                        zip.extract(entry, path.join(outLoc, this.files[1]), (err, _) => {
+                            if(err) return
+                            callback()
+                            zip.close()
+                        })
+                        break
+                    }
+                }
+            })
+        }
+        const unzip = (downloadLoc, outLoc, callback) => {
+            if(this.version === "unix"){
+                callback()
             }else{
-                resolve(false)
+                unzipWin(downloadLoc, outLoc, callback)
             }
+        }
+
+        return new Promise(resolve => {
+            let curr_tag = this.config.tag
+
+            // temp bc linux is not quite supported
+            if(this.version === "unix"){
+                resolve("unix-error")
+            }
+
+            this._getLatestTag(tag => {
+                if(download && ((tag > curr_tag) || curr_tag === null)){
+                    let file = this.version === "unix" ? this.url_files[0] : this.url_files[1]
+
+                    let temp_loc = path.join(tempDir, file)
+                    fs.mkdirSync(temp_loc, {recursive: true})
+                    let downloadedLoc = path.join(temp_loc, file)
+
+                    let url = this.url.split("/")
+                    url.pop()
+                    url.push("download", "latest", file)
+                    url = url.join("/")
+
+                    requests.downloadRequest(url, downloadedLoc).then(_ => {
+                        unzip(downloadedLoc, this.target, () => {
+                            this.makeExecutable(path.join(this.target, file), () => {
+                                this.setConfigVal("tag", tag)
+                                resolve(true)
+                            })
+                        })
+                    })
+                }else{
+                    resolve(false)
+                }
+            })
         })
     }
     get executor(){
