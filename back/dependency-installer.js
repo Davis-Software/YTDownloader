@@ -1,4 +1,4 @@
-const { platform, appDataDir } = require("./config")
+const { platform, appDataDir, tempDir } = require("./config")
 const requests = require("./requests")
 const fs = require("fs")
 const path = require("path")
@@ -88,6 +88,7 @@ class Ffmpeg extends Dependency{
 
         this.url = "https://github.com/yt-dlp/FFmpeg-Builds/releases/latest"
         this.files = ["ffmpeg", "ffmpeg.exe"]
+        this.url_files = ["ffmpeg-master-latest-linux64-gpl.tar.xz", "ffmpeg-master-latest-win64-gpl.zip"]
     }
     _getLatestTag(callback){
         requests.getRequest(this.url).then(resp => {
