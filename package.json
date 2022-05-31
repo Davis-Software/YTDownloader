@@ -41,11 +41,9 @@
     "build": {
         "appId": "org.software-city.projects.ytdownloader",
         "afterPack": "./afterPackHook.js",
-        "extraFiles": [
-            "tools"
-        ],
+        "extraFiles": [],
         "win": {
-            "target": "nsis-web",
+            "target": "nsis",
             "icon": "./static/logo/512x512.ico",
             "publish": {
                 "provider": "github",
