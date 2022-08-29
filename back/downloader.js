@@ -141,11 +141,13 @@ class YoutubeDlVideo{
         let options = [
             "-y",
             "-i", path.join(this.tempTarget, convTarget),
+            "-movflags", "use_metadata_tags",
             "-map_metadata", "0"
         ]
         for(let key in data){
-            options.push("-metadata")
-            options.push(`${key}=${data[key]}`)
+            options.push(...[
+                "-metadata", `${key}=${data[key]}`
+            ])
         }
         options.push(path.join(this.tempTarget, this.lastTarget))
         YoutubeDlVideo.ffMpegProcess(options, callback)
