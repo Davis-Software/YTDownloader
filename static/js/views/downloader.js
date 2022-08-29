@@ -117,6 +117,12 @@ messageBox.querySelector("button").addEventListener("click", _ => {
 })
 
 
+function callAttention(elem){
+    document.querySelectorAll(".attention").forEach(e => e.classList.remove("attention"))
+    elem.classList.add("attention")
+}
+
+
 function humanFileSize(bytes, dp=1) {
     let thresh = 1024
     if (Math.abs(bytes) < thresh) return bytes + ' B'
@@ -265,6 +271,7 @@ window.downloader.on("returnInfo", (_, info) => {
         elem.textContent = format.width ? formatVideoFormat(format) : formatAudioFormat(format)
         videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
     }
+    callAttention(videoFormatSelector)
 
     // DownloadOptions
     downloadOptionsCustomFilenameInput.value = info?.title || ""
@@ -329,6 +336,7 @@ videoFormatSelector.addEventListener("input", _ => {
         videoFormatInfoBox.textContent = ""
     }
     videoPreviewContinue.disabled = false
+    callAttention(videoPreviewContinue)
 })
 
 videoPreviewContinue.addEventListener("click", _ => {
@@ -370,6 +378,12 @@ videoPreviewContinue.addEventListener("click", _ => {
             break
     }
 
+    if(videoFileTypeSelector.value === "Please select an output filetype"){
+        callAttention(videoFileTypeSelector)
+    }else{
+        callAttention(downloadOptionsStart)
+    }
+
     videoInfoCollapse.hide()
     videoDownloadCollapse.show()
 })
@@ -379,6 +393,8 @@ downloadOptionsBack.addEventListener("click", _ => {
 })
 videoFileTypeSelector.addEventListener("input", _ => {
     outputLocationInput.parentElement.querySelector("button").disabled = false
+    callAttention(outputLocationInput.parentElement.querySelector("button"))
+
     selectedDownloadOutputFileType = videoFileTypeSelector.value
     updateDownloadOutputLocation()
 })
@@ -426,6 +442,8 @@ window.dialog.on("showDialogResponse:selectLocation", (_, response) => {
     selectedDownloadOutputFilePath = response.filePaths[0]
 
     updateDownloadOutputLocation()
+
+    callAttention(downloadOptionsStart)
     downloadOptionsCollapse.show()
 })
 function setDownloadOptionsCustomFilenameCollapseState(){

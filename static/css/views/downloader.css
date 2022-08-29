@@ -196,3 +196,23 @@
 #download-log ul li.err{
     color: var(--bs-danger);
 }
+
+
+.attention{
+    outline: 0 solid var(--bs-info);
+    animation-name: attention;
+    animation-duration: .5s;
+    animation-iteration-count: 5;
+    animation-timing-function: ease-in-out;
+}
+@keyframes attention {
+    0% {
+        outline: 0 solid var(--bs-info);
+    }
+    50% {
+        outline: 5px solid var(--bs-info);
+    }
+    100% {
+        outline: 0 solid var(--bs-info);
+    }
+}
