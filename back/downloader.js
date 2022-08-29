@@ -149,6 +149,10 @@ class YoutubeDlVideo{
                 "-metadata", `${key}=${data[key]}`
             ])
         }
+        options.push(...[
+            // "-c", "copy",
+            "-strict", "-2"
+        ])
         options.push(path.join(this.tempTarget, this.lastTarget))
         YoutubeDlVideo.ffMpegProcess(options, callback)
     }
