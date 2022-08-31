@@ -14,6 +14,12 @@ const loaderCollapse = new bootstrap.Collapse(loader.parentElement, {toggle: fal
 const videoInfoCollapse = new bootstrap.Collapse(videoInfo.parentElement, {toggle: false})
 const videoDownloadCollapse = new bootstrap.Collapse(videoDownload.parentElement, {toggle: false})
 
+const presetSettingsDownloadFormatSelect = settings.querySelector("#pr-setting-mode")
+const presetSettingsExportFormatSelect = settings.querySelector("#pr-setting-format")
+const presetSettingsDefaultFolderInput = settings.querySelector("#pr-setting-folder")
+const presetSettingsSongModeCheckbox = settings.querySelector("#pr-setting-metadata")
+const presetSettingsThumbnailCheckbox = settings.querySelector("#pr-setting-thumbnail")
+
 const videoFormatSelector = document.querySelector("#format-selector #format-selector-video")
 const videoFormatInfoBox = document.querySelector("#format-selector #format-info")
 const videoPreviewContinue = document.querySelector("#video-preview-continue")
@@ -73,6 +79,59 @@ let selectedDownloadOutputFilePath
 let selectedDownloadOutputFile
 
 let selectedThumbnail
+
+
+presetSettingsDownloadFormatSelect.value = localStorage.getItem("downloadFormat") || "none"
+presetSettingsExportFormatSelect.value = localStorage.getItem("exportFormat") || "none"
+presetSettingsDefaultFolderInput.value = localStorage.getItem("defaultFolder") || ""
+presetSettingsSongModeCheckbox.checked = localStorage.getItem("songMode") === "true"
+presetSettingsThumbnailCheckbox.checked = localStorage.getItem("thumbnail") === "true"
+
+presetSettingsDownloadFormatSelect.addEventListener("change", () => {
+    localStorage.setItem("downloadFormat", presetSettingsDownloadFormatSelect.value)
+
+    switch (presetSettingsDownloadFormatSelect.value){
+        case "preset-max-audio":
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Audio']").disabled = false
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Video']").disabled = true
+            break
+        case "preset-max":
+        case "preset-max-video":
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Audio']").disabled = true
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Video']").disabled = false
+            break
+        default:
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Audio']").disabled = false
+            presetSettingsExportFormatSelect.querySelector("optgroup[label='Video']").disabled = false
+            break
+    }
+})
+presetSettingsExportFormatSelect.addEventListener("change", () => {
+    localStorage.setItem("exportFormat", presetSettingsExportFormatSelect.value)
+})
+presetSettingsDefaultFolderInput.parentElement.querySelector(".btn-primary").addEventListener("click", () => {
+    window.dialog.showDialog({
+        title: "Select a default output folder",
+        buttonLabel: "Choose Folder",
+        properties: ["openDirectory"]
+    }, "selectDefaultLocation")
+})
+window.dialog.on("showDialogResponse:selectDefaultLocation", (_, response) => {
+    if(response.canceled) return
+    presetSettingsDefaultFolderInput.value = response.filePaths[0]
+    localStorage.setItem("defaultFolder", response.filePaths[0])
+})
+presetSettingsDefaultFolderInput.parentElement.querySelector(".btn-warning").addEventListener("click", () => {
+    presetSettingsDefaultFolderInput.value = ""
+    localStorage.setItem("defaultFolder", "")
+})
+presetSettingsSongModeCheckbox.addEventListener("change", () => {
+    localStorage.setItem("songMode", presetSettingsSongModeCheckbox.checked)
+})
+presetSettingsThumbnailCheckbox.addEventListener("change", () => {
+    localStorage.setItem("thumbnail", presetSettingsThumbnailCheckbox.checked)
+})
+
 
 
 function resetEverything(ignoreMessageBox=false, showSettings=true){
@@ -293,6 +352,11 @@ window.downloader.on("returnInfo", (_, info) => {
     downloadOptionsApplyThumbnailPreview.src = selectedThumbnail
 
     videoInfoData = info
+
+    if(["preset-max", "preset-max-video", "preset-max-audio"].includes(localStorage.getItem("downloadFormat"))){
+        videoFormatSelector.value = localStorage.getItem("downloadFormat")
+        videoFormatSelector.dispatchEvent(new Event("input"))
+    }
 })
 videoPreviewContinue.disabled = true
 videoFormatSelector.addEventListener("input", _ => {
@@ -383,9 +447,14 @@ videoPreviewContinue.addEventListener("click", _ => {
             break
     }
 
+    if(localStorage.getItem("exportFormat") && (!["", "none"].includes(localStorage.getItem("exportFormat")))){
+        videoFileTypeSelector.value = localStorage.getItem("exportFormat")
+        videoFileTypeSelector.dispatchEvent(new Event("input"))
+    }
+
     if(videoFileTypeSelector.value === "Please select an output filetype"){
         callAttention(videoFileTypeSelector)
-    }else{
+    }else if(outputLocationInput.value !== ""){
         callAttention(downloadOptionsStart)
     }
 
@@ -398,7 +467,16 @@ downloadOptionsBack.addEventListener("click", _ => {
 })
 videoFileTypeSelector.addEventListener("input", _ => {
     outputLocationInput.parentElement.querySelector("button").disabled = false
-    callAttention(outputLocationInput.parentElement.querySelector("button"))
+    if(localStorage.getItem("defaultFolder") && localStorage.getItem("defaultFolder") !== ""){
+        selectedDownloadOutputFilePath = localStorage.getItem("defaultFolder")
+    }else{
+        callAttention(outputLocationInput.parentElement.querySelector("button"))
+    }
+
+    downloadOptionsSongModeCheckbox.checked = localStorage.getItem("songMode") === "true"
+    downloadOptionsSongModeCheckbox.dispatchEvent(new Event("change"))
+    downloadOptionsApplyThumbnail.checked = localStorage.getItem("thumbnail") === "true"
+    downloadOptionsApplyThumbnail.dispatchEvent(new Event("change"))
 
     selectedDownloadOutputFileType = videoFileTypeSelector.value
     updateDownloadOutputLocation()

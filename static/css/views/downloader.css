@@ -19,6 +19,12 @@
     padding: 5px;
     border-radius: .25rem;
 }
+#settings .form-select{
+    background: #171d23;
+    margin-top: 5px;
+    padding: 8px;
+    border-radius: .25rem;
+}
 
 #video-preview{
     position: relative;

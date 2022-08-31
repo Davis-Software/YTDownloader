@@ -22,22 +22,66 @@
     <div id="settings">
         <h3 class="text-center mt-4">Welcome to the SWC YouTube Downloader</h3>
         <hr>
-        <p class="ms-3 mt-5">
-            With this new version you can now not only download from YouTube, but in fact from
-            any other site that youtube-dl supports.
-        </p>
         <p class="ms-3">
-            Additionally youtube-dl is now also automatically updated!
-            <br>So you will probably (hopefully) never run into download problems related to old yt-dl versions.
+            Most of the supported websites of 'yt-dlp' are supported by this application. <br>
+            A list of supported websites can be found <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank">here</a>.
         </p>
-        <p class="mt-5 ms-5 text-info">
-            In the future you will be able to select some default parameters for the downloading precess right here. <br>
-            For now this is obviously just a simple welcome page.
-            <br><br>
-        </p>
-        <p class="mt-5 ms-5">
-            -- YTDownloader developed by Davis_Software
-        </p>
+        <hr>
+
+        <div class="container">
+            <h5 class="text-center">Preset Settings</h5>
+
+            <div>
+                <label for="pr-setting-mode">Default download format:</label>
+                <select class="form-select" id="pr-setting-mode">
+                    <option value="none">None</option>
+                    <option value="preset-max-audio">Auto - max audio</option>
+                    <option value="preset-max-video">Auto - max video</option>
+                    <option value="preset-max">Auto - max audio & video</option>
+                </select>
+            </div>
+
+            <div class="mt-2">
+                <label for="pr-setting-format">Default export format:</label>
+                <select class="form-select" id="pr-setting-format">
+                    <option value="none">None</option>
+                    <optgroup label="Video">
+                        <option value="mp4">MP4</option>
+                        <option value="webm">WebM</option>
+                        <option value="mov">MOV</option>
+                    </optgroup>
+                    <optgroup label="Audio">
+                        <option value="mp3">MP3</option>
+                        <option value="wav">WAV</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="mt-2">
+                <label for="pr-setting-folder">Default output folder:</label>
+                <div class="input-group">
+                    <input id="pr-setting-folder" class="form-control" type="text" placeholder="No path selected" disabled>
+                    <button class="btn btn-warning">Clear</button>
+                    <button class="btn btn-primary">Browse</button>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <label>Other options:</label>
+                <div class="d-flex flex-row ms-2">
+                    <div class="form-check me-5">
+                        <input id="pr-setting-metadata" class="form-check-input" type="checkbox">
+                        <label for="pr-setting-metadata" class="form-check-label">Song Mode</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input id="pr-setting-thumbnail" class="form-check-input" type="checkbox">
+                        <label for="pr-setting-thumbnail" class="form-check-label">Apply thumbnail</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
