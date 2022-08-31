@@ -5,7 +5,8 @@ const path = require("path")
 contextBridge.exposeInMainWorld("utils", {
     path: {
         join: (...args) => path.join(...args)
-    }
+    },
+    openExternal: (url) => ipcRenderer.invoke("openExternal", url)
 })
 contextBridge.exposeInMainWorld("ipc", {
     debug: {on: (channel, listener) => {

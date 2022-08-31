@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain } = require("electron")
+const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron")
 const { autoUpdater } = require('electron-updater')
 const config = require("./back/config")
 
@@ -50,6 +50,10 @@ function MainWindow () {
     })
     ipcMain.handle("window:flashFrame", (_, value) => {
         win.flashFrame(value)
+    })
+
+    ipcMain.handle("openExternal", (_, url) => {
+        shell.openExternal(url)
     })
 
     ipcMain.handle("dialog:showDialog", (event, responder, options) => {

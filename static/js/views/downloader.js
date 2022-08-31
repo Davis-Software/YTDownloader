@@ -116,6 +116,11 @@ messageBox.querySelector("button").addEventListener("click", _ => {
     }
 })
 
+videoInfo.querySelector("#video-creator").addEventListener("click", e => {
+    e.preventDefault()
+    window.utils.openExternal(videoInfoData.channel_url)
+})
+
 
 function callAttention(elem){
     document.querySelectorAll(".attention").forEach(e => e.classList.remove("attention"))
