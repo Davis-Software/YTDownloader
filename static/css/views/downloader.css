@@ -53,11 +53,15 @@
     font-weight: bold;
     margin-top: 5px;
     border-radius: .25rem;
+    user-select: text;
 }
 #video-info{
     padding: 8px;
     border-radius: .25rem;
     background-color: #171d23;
+}
+#video-info a, #video-info span{
+    user-select: text;
 }
 #video-description{
     padding: 8px;
@@ -65,6 +69,7 @@
     background-color: #171d23;
     height: 50%;
     overflow-y: auto;
+    user-select: text;
 }
 #video-description::-webkit-scrollbar {
     width: 4px;
