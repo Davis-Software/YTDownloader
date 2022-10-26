@@ -599,11 +599,12 @@ downloadOptionsStart.addEventListener("click", _ => {
     downloadOptionsCollapse.hide()
     downloadProgressCollapse.show()
 
+    let artistData = downloadOptionsSongModeArtistInput.value.split(",").map(v => v.trim()).join("/")
     let metadata = downloadOptionsSongModeCheckbox.checked
         ? {
             title: downloadOptionsSongModeTitleInput.value,
-            artist: downloadOptionsSongModeArtistInput.value,
-            author: downloadOptionsSongModeArtistInput.value
+            artist: artistData,
+            author: artistData
         }
         : null
 
