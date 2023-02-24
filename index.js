@@ -87,6 +87,7 @@ function MainWindow () {
                     The needed ffmpeg version cannot be installed automatically in unix-based systems
                     Please go to: "https://github.com/yt-dlp/FFmpeg-Builds/releases/tag/latest" and download it manually!
                     It must be placed in "${FfmpegPackage.target}".
+                    If you have already done this, please ignore this message.
                 `.replaceAll("    ", "").replaceAll("\t", "")
             }).then()
         }
