@@ -24,9 +24,7 @@
 - Output converter
 - Preview video information (thumbnail, title, description, views, etc...)
 - Compatible with all [youtube-dl](https://github.com/ytdl-org/youtube-dl) websites (not only YouTube)
-- Automatic download and update of [youtube-dl](https://github.com/ytdl-org/youtube-dl)
-- [FFMpeg](https://ffmpeg.org/) Bundled
-- More features coming...
+- Automatic download / update of [youtube-dl](https://github.com/ytdl-org/youtube-dl) and [FFMpeg](https://ffmpeg.org/)
 
 # Installation
 * Download an installer
