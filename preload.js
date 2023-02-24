@@ -47,8 +47,8 @@ contextBridge.exposeInMainWorld("downloader", {
         let responder = "downloader:returnInfo"
         ipcRenderer.invoke("downloader:getInfo", responder, url).then(_ => {callback(responder)})
     },
-    startDownload: (url, format, target, fileType, metadata, thumbnail) => {
-        ipcRenderer.invoke("downloader:startDownload", url, format, target, fileType, metadata, thumbnail).then()
+    startDownload: (url, format, container, target, fileType, metadata, thumbnail) => {
+        ipcRenderer.invoke("downloader:startDownload", url, format, container, target, fileType, metadata, thumbnail).then()
     },
     killDownload: _ => {
         ipcRenderer.invoke("downloader:kill").then()

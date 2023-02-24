@@ -73,6 +73,7 @@ let applied = false
 let videoInfoData
 
 let selectedDownloadFormat
+let selectedDownloadFormatContainer
 let selectedDownloadOutputMode
 let selectedDownloadOutputFileType
 let selectedDownloadOutputFilePath
@@ -352,6 +353,7 @@ window.downloader.on("returnInfo", (_, info) => {
     downloadOptionsApplyThumbnailPreview.src = selectedThumbnail
 
     videoInfoData = info
+    console.log(info)
 
     if(["preset-max", "preset-max-video", "preset-max-audio"].includes(localStorage.getItem("downloadFormat"))){
         videoFormatSelector.value = localStorage.getItem("downloadFormat")
@@ -399,8 +401,10 @@ videoFormatSelector.addEventListener("input", _ => {
                 videoFormatInfoBox.innerText = `Video: ${formatVideoFormat(selectedVideoFormatObj)}\nAudio: ${formatAudioFormat(selectedAudioFormatObj)}`
                 break
         }
+        selectedDownloadFormatContainer = videoInfoData.ext
     }else{
         selectedDownloadFormat = videoFormatSelector.value
+        selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === videoFormatSelector.value).ext
         selectedDownloadOutputMode = "custom"
         videoFormatInfoBox.textContent = ""
     }
@@ -618,6 +622,7 @@ downloadOptionsStart.addEventListener("click", _ => {
     window.downloader.startDownload(
         urlInput.value,
         selectedDownloadFormat,
+        selectedDownloadFormatContainer,
         selectedDownloadOutputFile,
         selectedDownloadOutputFileType,
         metadata,

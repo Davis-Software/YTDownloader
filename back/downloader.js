@@ -64,15 +64,16 @@ class YoutubeDlVideo{
             noCheckCertificate: true
         })
     }
-    download(format, target, fileType, callback){
+    download(format, container, target, fileType, callback){
         log("Initialized downloader components...")
         log("Starting to download...")
 
         invoke("downloader:progress:info", "Starting download...")
         invoke("downloader:progress:mode", "stable")
+        this.container = container
         this.target = target
         this.targetFormat = fileType
-        this.lastTarget = "download-converted"
+        this.lastTarget = `download-raw.${container}`
 
         const ytDownload = execFile(YoutubeDlPackage.executor, [
             "-f", format,
@@ -127,6 +128,26 @@ class YoutubeDlVideo{
                 callback()
             }
         })
+    }
+    simpleConvert(callback){
+        if(
+            (!this._downloaded || this.container === this.targetFormat)
+        ) return
+
+        log("Converting file to target format")
+        invoke("downloader:progress:info", "Converting file...")
+        invoke("downloader:progress:mode", "unstable")
+
+        let convTarget = String(this.lastTarget)
+        this.lastTarget = `download-converted.${this.targetFormat}`
+        let convOptions = [
+            "-y",
+            "-i", path.join(this.tempTarget, convTarget),
+            "-c", "copy",
+            "-strict", "-2"
+        ]
+        convOptions.push(path.join(this.tempTarget, this.lastTarget))
+        YoutubeDlVideo.ffMpegProcess(convOptions, callback)
     }
     applyMetadata(data, callback){
         if(!this._downloaded) return
@@ -201,8 +222,11 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "stable")
 
         if(!this._downloaded) return
-        if(fs.existsSync(path.join(this.tempTarget, "download-converted"))){
-            fs.rm(path.join(this.tempTarget, "download-converted"), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `download-raw.${this.container}`))){
+            fs.rm(path.join(this.tempTarget, `download-raw.${this.container}`), _ => {})
+        }
+        if(fs.existsSync(path.join(this.tempTarget, `download-converted.${this.targetFormat}`))){
+            fs.rm(path.join(this.tempTarget, `download-converted.${this.targetFormat}`), _ => {})
         }
         if(fs.existsSync(path.join(this.tempTarget, "download-metadata." + this.targetFormat))){
             fs.rm(path.join(this.tempTarget, "download-metadata." + this.targetFormat), _ => {})
@@ -227,7 +251,7 @@ function registerListeners() {
             invoke("downloader:error", makeError(err))
         })
     })
-    registerIpcListener("downloader:startDownload", (_, url, format, target, fileType, metadata, thumbnail) => {
+    registerIpcListener("downloader:startDownload", (_, url, format, container, target, fileType, metadata, thumbnail) => {
         let video = new YoutubeDlVideo(url)
 
         function end(){
@@ -259,9 +283,18 @@ function registerListeners() {
                 applyThumbnail()
             }
         }
+        function simpleConvert(){
+            if(metadata || thumbnail){
+                applyMetadata()
+            }else{
+                video.simpleConvert(() => {
+                    end()
+                })
+            }
+        }
 
-        video.download(format, target, fileType, _ => {
-            applyMetadata()
+        video.download(format, container, target, fileType, _ => {
+            simpleConvert()
         })
     })
     registerIpcListener("downloader:kill", _ => {
