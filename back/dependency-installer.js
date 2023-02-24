@@ -129,11 +129,6 @@ class Ffmpeg extends Dependency{
         return new Promise(resolve => {
             let curr_tag = this.config.tag
 
-            // temp bc linux is not quite supported
-            if(this.version === "unix"){
-                resolve("unix-error")
-            }
-
             this._getLatestTag(tag => {
                 if(download && ((tag > curr_tag) || curr_tag === null)){
                     let file = this.version === "unix" ? this.url_files[0] : this.url_files[1]

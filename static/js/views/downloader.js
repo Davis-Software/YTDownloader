@@ -391,7 +391,7 @@ videoFormatSelector.addEventListener("input", _ => {
                 videoFormatInfoBox.innerText = `Video: None\nAudio: ${formatAudioFormat(selectedFormatObj)}`
                 break
             default:
-                selectedDownloadFormat = videoInfoData.format_id
+                selectedDownloadFormat = formatTarget.join("+")
                 selectedDownloadOutputMode = "normal"
 
                 let selectedVideoFormatObj = getFormatObjFromId(videoFormat)

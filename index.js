@@ -29,7 +29,8 @@ function MainWindow () {
         darkTheme: true,
         frame: config.devMode,
         webPreferences: {
-            preload: path.join(__dirname, "preload.js")
+            preload: path.join(__dirname, "preload.js"),
+            nodeIntegration: true,
         }
     })
 
@@ -57,8 +58,8 @@ function MainWindow () {
     })
 
     ipcMain.handle("dialog:showDialog", (event, responder, options) => {
-        dialog.showOpenDialog(win, options).then((canceled, result) => {
-            win.webContents.send(responder, canceled, result)
+        dialog.showOpenDialog(win, options).then((result) => {
+            win.webContents.send(responder, result)
         }).catch(err => {
             win.webContents.send("downloader:error", err)
         })

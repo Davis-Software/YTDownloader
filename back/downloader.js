@@ -72,12 +72,11 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "stable")
         this.target = target
         this.targetFormat = fileType
-        this.lastTarget = "download-converted." + this.targetFormat
+        this.lastTarget = "download-converted"
 
         const ytDownload = execFile(YoutubeDlPackage.executor, [
             "-f", format,
             "-o", path.join(this.tempTarget, this.lastTarget),
-            "--merge-output-format", fileType,
             "--ffmpeg-location", FfmpegPackage.executor,
             "--audio-quality", "0",
             this.url
@@ -202,8 +201,8 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "stable")
 
         if(!this._downloaded) return
-        if(fs.existsSync(path.join(this.tempTarget, "download-converted." + this.targetFormat))){
-            fs.rm(path.join(this.tempTarget, "download-converted." + this.targetFormat), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, "download-converted"))){
+            fs.rm(path.join(this.tempTarget, "download-converted"), _ => {})
         }
         if(fs.existsSync(path.join(this.tempTarget, "download-metadata." + this.targetFormat))){
             fs.rm(path.join(this.tempTarget, "download-metadata." + this.targetFormat), _ => {})

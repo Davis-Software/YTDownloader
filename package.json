@@ -17,7 +17,7 @@
     "license": "MIT",
     "main": "index.js",
     "scripts": {
-        "start": "electron .",
+        "start": "electron --trace-warnings .",
         "pack": "electron-builder --dir",
         "dist": "electron-builder --x64 --win",
         "distlinux": "electron-builder --x64 --linux",
