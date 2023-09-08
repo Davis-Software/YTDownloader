@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="UTF-8">
+    <title>progress bar</title>
+
+    <link rel="stylesheet" href="../../static/bootstrap/bootstrap.min.css">
+    <script src="../../static/bootstrap/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="../../static/css/index.css">
+    <link rel="stylesheet" href="../../static/css/custom-styles.css">
+</head>
+<body>
+<h6 class="text-center"></h6>
+<div class="progress mx-2">
+    <div class="progress-bar progress-bar-animated"></div>
+</div>
+<span class="mx-3"></span>
+<div class="mx-3" id="log" style="height: 100%; width: 100vw; overflow: auto;" hidden></div>
+<script>
+    const titleElem = document.querySelector('h6')
+    const progressBarElem = document.querySelector('.progress-bar')
+    const infoElem = document.querySelector('span')
+
+    const options = {
+        min: 0,
+        max: 100
+    }
+
+    window.progressBar.on("set-max", (e, max) => {
+        options.max = max
+    })
+    window.progressBar.on("set-min", (e, min) => {
+        options.min = min
+    })
+
+    window.progressBar.on("set-title", (e, title) => {
+        titleElem.textContent = title
+    })
+    window.progressBar.on("set-progress", (e, progress) => {
+        progressBarElem.style.width = `${Math.round(progress/options.max*100)-options.min}%`
+    })
+    window.progressBar.on("set-striped", (e, bool) => {
+        progressBarElem.classList.toggle("progress-bar-striped", bool)
+    })
+    window.progressBar.on("set-text", (e, text) => {
+        progressBarElem.textContent = text
+    })
+    window.progressBar.on("set-info", (e, text) => {
+        infoElem.textContent = text
+    })
+    window.progressBar.on("remove-animation", () => {
+        progressBarElem.classList.remove("progress-bar-animated")
+    })
+    function log(className, text) {
+        if(document.querySelector("#log").hidden) {
+            document.querySelector("#log").hidden = false
+        }
+        let log = document.querySelector("#log")
+        let ol = log.innerHTML
+        log.innerHTML = ol.substring(ol.length > 1000 ? ol.length - 1000 : 0, ol.length) + `<span class="${className}">${text}</span><br>`
+        log.scrollTop = log.scrollHeight
+    }
+    window.progressBar.on("log", (e, level, message) => {
+        log("text-" + {error: "danger", warn: "warning"}[level], message)
+    })
+</script>
+</body>
+</html>

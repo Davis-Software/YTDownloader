@@ -5,6 +5,7 @@ const path = require("path")
 const { JSDOM } = require("jsdom")
 const StreamZip = require('node-stream-zip');
 const {compare} = require("compare-versions");
+const {ProgressBar} = require("./utility-windows");
 
 
 class Dependency{
@@ -66,12 +67,22 @@ class YoutubeDlDependency extends Dependency{
                     url.push("download", tag, file)
                     url = url.join("/")
 
-                    requests.downloadRequest(url, path.join(this.target, file)).then(_ => {
-                        this.makeExecutable(path.join(this.target, file), () => {
-                            this.setConfigVal("tag", tag)
-                            resolve(tag)
+                    new ProgressBar("yt-dlp Installer", 100, 0, (bar) => {
+                        bar.setValue(100)
+                        bar.setText("Downloading latest yt-dlp version")
+                        bar.striped()
+
+                        requests.downloadRequest(url, path.join(this.target, file)).then(_ => {
+                            this.makeExecutable(path.join(this.target, file), () => {
+                                this.setConfigVal("tag", tag)
+                                bar.striped(false)
+                                bar.setText("yt-dlp update successful")
+                                bar.setInfo(`yt-dlp is now at version: ${tag}`)
+                                setTimeout(() => bar.close(), 2000)
+                                resolve(tag)
+                            })
                         })
-                    })
+                    }, {width: 500, height: 200, logVisible: false})
                 }else{
                     resolve(false)
                 }
@@ -148,14 +159,25 @@ class Ffmpeg extends Dependency{
                     url.push("download", "latest", file)
                     url = url.join("/")
 
-                    requests.downloadRequest(url, downloadedLoc).then(_ => {
-                        unzip(downloadedLoc, this.target, () => {
-                            this.makeExecutable(path.join(this.target, file), () => {
-                                this.setConfigVal("tag", tag)
-                                resolve(true)
+                    new ProgressBar("ffmpeg Installer", 100, 0, (bar) => {
+                        bar.setValue(100)
+                        bar.setText("Downloading latest ffmpeg archive")
+                        bar.striped()
+
+                        requests.downloadRequest(url, downloadedLoc).then(_ => {
+                            bar.setText("Extracting ffmpeg archive")
+                            unzip(downloadedLoc, this.target, () => {
+                                this.makeExecutable(path.join(this.target, file), () => {
+                                    this.setConfigVal("tag", tag)
+                                    bar.striped(false)
+                                    bar.setText("ffmpeg update successful")
+                                    bar.setInfo(`ffmpeg is now at version: ${tag}`)
+                                    setTimeout(() => bar.close(), 2000)
+                                    resolve(true)
+                                })
                             })
                         })
-                    })
+                    }, {width: 500, height: 200, logVisible: false})
                 }else{
                     resolve(false)
                 }

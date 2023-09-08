@@ -66,19 +66,11 @@ function MainWindow () {
     })
 
     YoutubeDlPackage.checkForUpdate(true).then(ret => {
-        if(ret){
-            dialog.showMessageBox(win, {
-                title: "yt-dlp update successful",
-                message: `Successfully updated 'yt-dlp' to version ${ret}`
-            }).then()
-        }
+        console.log(ret ? "yt-dlp update successful" : "yt-dlp is up to date or could not be updated")
     })
     FfmpegPackage.checkForUpdate(true).then(ret => {
         if(ret === true){
-            dialog.showMessageBox(win, {
-                title: "ffmpeg update successful",
-                message: `Successfully updated 'yt-dlp-ffmpeg'`
-            }).then()
+            console.log("ffmpeg update successful")
         }else if(ret === "unix-error"){
             // temp bc linux is not quite supported
             dialog.showMessageBox(win, {
@@ -90,6 +82,8 @@ function MainWindow () {
                     If you have already done this, please ignore this message.
                 `.replaceAll("    ", "").replaceAll("\t", "")
             }).then()
+        }else{
+            console.log("ffmpeg is up to date or could not be updated")
         }
     })
 

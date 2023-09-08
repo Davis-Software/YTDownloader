@@ -54,3 +54,12 @@ contextBridge.exposeInMainWorld("downloader", {
         ipcRenderer.invoke("downloader:kill").then()
     }
 })
+contextBridge.exposeInMainWorld("progressBar", {
+    on: (channel, listener) => {
+        ipcRenderer.on(`progress-bar:${channel}`, listener)
+    },
+    create: (title, max, min, options = {}) =>
+        ipcRenderer.invoke("progress-bar:create", title, max, min, options),
+    provide: (id, call, value) =>
+        ipcRenderer.invoke(`progress-bar:${call}:on-${id}`, value)
+})
