@@ -62,6 +62,16 @@
                 "releaseType": "release"
             }
         },
+        "mac": {
+            "target": "dmg",
+            "icon": "./static/logo/512x512.icns",
+            "darkModeSupport": true,
+            "publish": {
+                "provider": "github",
+                "publishAutoUpdate": true,
+                "releaseType": "release"
+            }
+        },
         "protocols": {
             "name": "YT Downloader",
             "schemes": [
