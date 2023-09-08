@@ -4,6 +4,7 @@ const fs = require("fs")
 const path = require("path")
 const { JSDOM } = require("jsdom")
 const StreamZip = require('node-stream-zip');
+const {compare} = require("compare-versions");
 
 
 class Dependency{
@@ -56,9 +57,9 @@ class YoutubeDlDependency extends Dependency{
     }
     checkForUpdate(download){
         return new Promise(resolve => {
-            let curr_tag = this.config.tag
+            let curr_tag = fs.existsSync(this.executor) ? this.config.tag : null
             this._getLatestTag(tag => {
-                if(download && ((tag > curr_tag) || curr_tag === null)){
+                if(download && (curr_tag === null || compare(tag, curr_tag, ">"))){
                     let file = this.version === "unix" ? this.files[0] : this.files[1]
                     let url = this.url.split("/")
                     url.pop()
@@ -127,7 +128,7 @@ class Ffmpeg extends Dependency{
         }
 
         return new Promise(resolve => {
-            let curr_tag = this.config.tag
+            let curr_tag = fs.existsSync(this.executor) ? this.config.tag : null
 
             // temp bc linux is not quite supported
             if(this.version === "unix"){
@@ -135,7 +136,7 @@ class Ffmpeg extends Dependency{
             }
 
             this._getLatestTag(tag => {
-                if(download && ((tag > curr_tag) || curr_tag === null)){
+                if(download && (curr_tag === null || tag !== curr_tag)){
                     let file = this.version === "unix" ? this.url_files[0] : this.url_files[1]
 
                     let temp_loc = path.join(tempDir, file)

@@ -36,7 +36,8 @@
         "js-yaml": "^4.1.0",
         "jsdom": "^22.1.0",
         "node-stream-zip": "^1.15.0",
-        "youtube-dl-exec": "^2.4.8"
+        "youtube-dl-exec": "^2.4.8",
+        "compare-versions": "^6.1.0"
     },
     "build": {
         "appId": "org.software-city.projects.ytdownloader",
