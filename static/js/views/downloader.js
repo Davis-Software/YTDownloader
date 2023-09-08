@@ -353,7 +353,6 @@ window.downloader.on("returnInfo", (_, info) => {
     downloadOptionsApplyThumbnailPreview.src = selectedThumbnail
 
     videoInfoData = info
-    console.log(info)
 
     if(["preset-max", "preset-max-video", "preset-max-audio"].includes(localStorage.getItem("downloadFormat"))){
         videoFormatSelector.value = localStorage.getItem("downloadFormat")

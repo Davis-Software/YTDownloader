@@ -58,9 +58,12 @@ class YoutubeDlVideo{
     }
     getInfo(){
         return youtubeDl(this.url, {
-            dumpSingleJson: true,
+            // dumpSingleJson: true,
+            dumpJson: true,
             noWarnings: true,
-            callHome: false,
+            simulate: true,
+            skipDownload: true,
+            noCallHome: true,
             noCheckCertificate: true
         })
     }
