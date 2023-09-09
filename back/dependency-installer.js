@@ -6,6 +6,7 @@ const { JSDOM } = require("jsdom")
 const StreamZip = require('node-stream-zip');
 const {compare} = require("compare-versions");
 const {ProgressBar} = require("./utility-windows");
+const {exec} = require("child_process");
 
 
 class Dependency{
@@ -130,21 +131,23 @@ class Ffmpeg extends Dependency{
                 }
             })
         }
-        const unzip = (downloadLoc, outLoc, callback) => {
-            if(this.version === "unix"){
+        const unzipUnix = (downloadLoc, outLoc, callback) => {
+            let baseName = path.basename(downloadLoc).split(".")[0] + "/bin/ffmpeg"
+            exec(`tar --strip-components=2 -C ${outLoc} -xf ${downloadLoc} ${baseName}`, (err, stdout, stderr) => {
+                if(err) {
+                    console.error(err, stdout, stderr)
+                    return
+                }
                 callback()
-            }else{
-                unzipWin(downloadLoc, outLoc, callback)
-            }
+            })
+        }
+        const unzip = (downloadLoc, outLoc, callback) => {
+            let extractor = this.version === "unix" ? unzipUnix : unzipWin
+            extractor(downloadLoc, outLoc, callback)
         }
 
         return new Promise(resolve => {
             let curr_tag = fs.existsSync(this.executor) ? this.config.tag : null
-
-            // temp bc linux is not quite supported
-            if(this.version === "unix"){
-                resolve("unix-error")
-            }
 
             this._getLatestTag(tag => {
                 if(download && (curr_tag === null || tag !== curr_tag)){

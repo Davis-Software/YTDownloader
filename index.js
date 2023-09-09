@@ -66,25 +66,10 @@ function MainWindow () {
     })
 
     YoutubeDlPackage.checkForUpdate(true).then(ret => {
-        console.log(ret ? "yt-dlp update successful" : "yt-dlp is up to date or could not be updated")
+        console.log(ret ? "yt-dlp update successful" : "yt-dlp is up to date")
     })
     FfmpegPackage.checkForUpdate(true).then(ret => {
-        if(ret === true){
-            console.log("ffmpeg update successful")
-        }else if(ret === "unix-error"){
-            // temp bc linux is not quite supported
-            dialog.showMessageBox(win, {
-                title: "ffmpeg cannot be installed",
-                message: `
-                    The needed ffmpeg version cannot be installed automatically in unix-based systems
-                    Please go to: "https://github.com/yt-dlp/FFmpeg-Builds/releases/tag/latest" and download it manually!
-                    It must be placed in "${FfmpegPackage.target}".
-                    If you have already done this, please ignore this message.
-                `.replaceAll("    ", "").replaceAll("\t", "")
-            }).then()
-        }else{
-            console.log("ffmpeg is up to date or could not be updated")
-        }
+        console.log(ret ? "ffmpeg update successful" : "ffmpeg is up to date")
     })
 
     downloader.registerListeners()
