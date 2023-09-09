@@ -69,11 +69,16 @@ class YoutubeDlDependency extends Dependency{
                     url = url.join("/")
 
                     new ProgressBar("yt-dlp Installer", 100, 0, (bar) => {
-                        bar.setValue(100)
-                        bar.setText("Downloading latest yt-dlp version")
-                        bar.striped()
+                        bar.setInfo("Downloading latest ffmpeg archive")
 
-                        requests.downloadRequest(url, path.join(this.target, file)).then(_ => {
+                        function progressCallback(event){
+                            let percent = Math.round((event.loaded / event.total) * 100)
+                            bar.setValue(percent)
+                            bar.setText(`${percent}% completed`)
+                        }
+
+                        requests.downloadRequest(url, path.join(this.target, file), progressCallback).then(_ => {
+                            bar.setValue(100)
                             this.makeExecutable(path.join(this.target, file), () => {
                                 this.setConfigVal("tag", tag)
                                 bar.striped(false)
@@ -163,12 +168,19 @@ class Ffmpeg extends Dependency{
                     url = url.join("/")
 
                     new ProgressBar("ffmpeg Installer", 100, 0, (bar) => {
-                        bar.setValue(100)
-                        bar.setText("Downloading latest ffmpeg archive")
-                        bar.striped()
+                        bar.setInfo("Downloading latest ffmpeg archive")
 
-                        requests.downloadRequest(url, downloadedLoc).then(_ => {
-                            bar.setText("Extracting ffmpeg archive")
+                        function progressCallback(event){
+                            let percent = Math.round((event.loaded / event.total) * 100)
+                            bar.setValue(percent)
+                            bar.setText(`${percent}% completed`)
+                        }
+
+                        requests.downloadRequest(url, downloadedLoc, progressCallback).then(_ => {
+                            bar.setText("working...")
+                            bar.setInfo("Extracting ffmpeg archive")
+                            bar.setValue(100)
+                            bar.striped()
                             unzip(downloadedLoc, this.target, () => {
                                 this.makeExecutable(path.join(this.target, file), () => {
                                     this.setConfigVal("tag", tag)

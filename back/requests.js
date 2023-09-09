@@ -32,10 +32,11 @@ function postRequest(url, data){
         })
     })
 }
-function downloadRequest(url, target){
+function downloadRequest(url, target, progressCallback){
     return new Promise(async (resolve, reject) => {
         http_instance.get(url, {
-            responseType: "stream"
+            responseType: "stream",
+            onDownloadProgress: progressCallback
         }).then(resp => {
             let writer = fs.createWriteStream(target)
             resp.data.pipe(writer)
