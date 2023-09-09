@@ -138,7 +138,7 @@ class Ffmpeg extends Dependency{
         }
         const unzipUnix = (downloadLoc, outLoc, callback) => {
             let baseName = path.basename(downloadLoc).split(".")[0] + "/bin/ffmpeg"
-            exec(`tar --strip-components=2 -C ${outLoc} -xf ${downloadLoc} ${baseName}`, (err, stdout, stderr) => {
+            exec(`tar --strip-components=2 -C "${outLoc}" -xf "${downloadLoc}" "${baseName}"`, (err, stdout, stderr) => {
                 if(err) {
                     console.error(err, stdout, stderr)
                     return
