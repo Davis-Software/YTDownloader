@@ -39,12 +39,14 @@ class Dependency{
             encoding: "utf-8"
         }))
     }
-    get canAccess(){
+    checkAccess(){
+        if(!fs.existsSync(this.executor)) return false
         try {
             fs.accessSync(this.executor, fs.constants.X_OK | fs.constants.R_OK | fs.constants.W_OK)
             return true
         }catch (e){
             console.error("Dependency Error: " + e.message)
+            fs.rmSync(this.executor)
             return false
         }
     }
@@ -84,7 +86,7 @@ class YoutubeDlDependency extends Dependency{
         })
     }
     checkForUpdate(download){
-        if(!this.canAccess) fs.rmSync(this.executor)
+        this.checkAccess()
 
         return new Promise(resolve => {
             let curr_tag = fs.existsSync(this.executor) ? this.config.tag : null
@@ -146,7 +148,7 @@ class Ffmpeg extends Dependency{
         })
     }
     checkForUpdate(download){
-        if(!this.canAccess) fs.rmSync(this.executor)
+        this.checkAccess()
 
         const unzipWin = (downloadLoc, outLoc, callback) => {
             let zip = new StreamZip({
