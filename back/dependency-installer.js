@@ -27,17 +27,43 @@ class Dependency{
         }
     }
     makeExecutable(filepath, callback){
-        fs.chmod(filepath, "0500", callback)
+        fs.chmod(filepath, fs.constants.S_IRUSR | fs.constants.S_IWUSR | fs.constants.S_IXUSR, callback)
+    }
+    setConfigVal(key, val){
+        let conf = this.config
+        conf[key] = val
+        fs.writeFileSync(this.configFile, JSON.stringify(conf))
     }
     get config(){
         return JSON.parse(fs.readFileSync(this.configFile, {
             encoding: "utf-8"
         }))
     }
-    setConfigVal(key, val){
-        let conf = this.config
-        conf[key] = val
-        fs.writeFileSync(this.configFile, JSON.stringify(conf))
+    get canAccess(){
+        try {
+            fs.accessSync(this.executor, fs.constants.X_OK | fs.constants.R_OK | fs.constants.W_OK)
+            return true
+        }catch (e){
+            console.error("Dependency Error: " + e.message)
+            return false
+        }
+    }
+
+    /**
+     * Implementation required
+     * @param download
+     * @returns {Promise<boolean>}
+     */
+    checkForUpdate(download){
+        throw new Error("Not Implemented")
+    }
+
+    /**
+     * Implementation required
+     * @returns {string}
+     */
+    get executor(){
+        throw new Error("Not Implemented")
     }
 }
 
@@ -58,6 +84,8 @@ class YoutubeDlDependency extends Dependency{
         })
     }
     checkForUpdate(download){
+        if(!this.canAccess) fs.rmSync(this.executor)
+
         return new Promise(resolve => {
             let curr_tag = fs.existsSync(this.executor) ? this.config.tag : null
             this._getLatestTag(tag => {
@@ -118,6 +146,8 @@ class Ffmpeg extends Dependency{
         })
     }
     checkForUpdate(download){
+        if(!this.canAccess) fs.rmSync(this.executor)
+
         const unzipWin = (downloadLoc, outLoc, callback) => {
             let zip = new StreamZip({
                 file: downloadLoc,
