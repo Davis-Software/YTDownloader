@@ -6,6 +6,7 @@ const { appDataDir } = require("./config")
 const { downloadRequest } = require("./requests")
 const path = require("path")
 const fs = require("fs")
+const {randomUUID} = require("crypto")
 
 
 const youtubeDl = create(YoutubeDlPackage.executor)
@@ -45,16 +46,13 @@ function killProcess(){
 
 class YoutubeDlVideo{
     constructor(url) {
+        this.uuid = randomUUID()
         this.url = url
         this.tempTarget = path.join(appDataDir, "targets")
         this.lastTarget = ""
         this.target = ""
         this._downloaded = false
         this.targetFormat = ""
-
-        fs.mkdirSync(this.tempTarget, {
-            recursive: true
-        })
     }
     getInfo(){
         return youtubeDl(this.url, {
@@ -76,7 +74,7 @@ class YoutubeDlVideo{
         this.container = container
         this.target = target
         this.targetFormat = fileType
-        this.lastTarget = `download-raw.${container}`
+        this.lastTarget = `${this.uuid}-raw.${container}`
 
         const ytDownload = execFile(YoutubeDlPackage.executor, [
             "-f", format,
@@ -142,7 +140,7 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "unstable")
 
         let convTarget = String(this.lastTarget)
-        this.lastTarget = `download-converted.${this.targetFormat}`
+        this.lastTarget = `${this.uuid}-converted.${this.targetFormat}`
         let convOptions = [
             "-y",
             "-i", path.join(this.tempTarget, convTarget),
@@ -160,7 +158,7 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "unstable")
 
         let convTarget = String(this.lastTarget)
-        this.lastTarget = "download-metadata." + this.targetFormat
+        this.lastTarget = `${this.uuid}-metadata.` + this.targetFormat
         let options = [
             "-y",
             "-i", path.join(this.tempTarget, convTarget),
@@ -187,7 +185,7 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "unstable")
 
         let metaTarget = String(this.lastTarget)
-        this.lastTarget = "download-thumbnail." + this.targetFormat
+        this.lastTarget = `${this.uuid}-thumbnail.` + this.targetFormat
         let options = [
             "-y",
             "-i", path.join(this.tempTarget, metaTarget),
@@ -204,9 +202,9 @@ class YoutubeDlVideo{
         log(`Downloading thumbnail from remote: ${url}`)
         invoke("downloader:progress:info", "Downloading thumbnail...")
         invoke("downloader:progress:mode", "unstable")
-        downloadRequest(url, path.join(this.tempTarget, "thumb.png")).then(_ => {
+        downloadRequest(url, path.join(this.tempTarget, `${this.uuid}-thumb.png`)).then(_ => {
             log("Thumbnail download completed")
-            this.applyThumbnail(path.join(this.tempTarget, "thumb.png"), callback)
+            this.applyThumbnail(path.join(this.tempTarget, `${this.uuid}-thumb.png`), callback)
         })
     }
     copyToEndTarget(callback){
@@ -225,20 +223,20 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "stable")
 
         if(!this._downloaded) return
-        if(fs.existsSync(path.join(this.tempTarget, `download-raw.${this.container}`))){
-            fs.rm(path.join(this.tempTarget, `download-raw.${this.container}`), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-raw.${this.container}`))){
+            fs.rm(path.join(this.tempTarget, `${this.uuid}-raw.${this.container}`), () => {})
         }
-        if(fs.existsSync(path.join(this.tempTarget, `download-converted.${this.targetFormat}`))){
-            fs.rm(path.join(this.tempTarget, `download-converted.${this.targetFormat}`), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-converted.${this.targetFormat}`))){
+            fs.rm(path.join(this.tempTarget, `${this.uuid}-converted.${this.targetFormat}`), () => {})
         }
-        if(fs.existsSync(path.join(this.tempTarget, "download-metadata." + this.targetFormat))){
-            fs.rm(path.join(this.tempTarget, "download-metadata." + this.targetFormat), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-metadata.` + this.targetFormat))){
+            fs.rm(path.join(this.tempTarget, `${this.uuid}-metadata.` + this.targetFormat), () => {})
         }
-        if(fs.existsSync(path.join(this.tempTarget, "download-thumbnail." + this.targetFormat))){
-            fs.rm(path.join(this.tempTarget, "download-thumbnail." + this.targetFormat), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-thumbnail.` + this.targetFormat))){
+            fs.rm(path.join(this.tempTarget, `${this.uuid}-thumbnail.` + this.targetFormat), () => {})
         }
-        if(fs.existsSync(path.join(this.tempTarget, "thumb.png"))){
-            fs.rm(path.join(this.tempTarget, "thumb.png"), _ => {})
+        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-thumb.png`))){
+            fs.rm(path.join(this.tempTarget, `${this.uuid}-thumb.png`), () => {})
         }
 
         invoke("downloader:progress:downloadComplete")
