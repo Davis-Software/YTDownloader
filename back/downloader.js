@@ -290,7 +290,7 @@ class YoutubeDlVideo{
 
         for(let file of fs.readdirSync(this.tempTarget)){
             if(!file.startsWith(this.uuid)) continue
-            fs.rm(path.join(this.tempTarget, file), {recursive: true})
+            fs.rm(path.join(this.tempTarget, file), {recursive: true}, () => {})
         }
 
         invoke("downloader:progress:downloadComplete")
