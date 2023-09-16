@@ -19,6 +19,7 @@
 > #### And best of all... many UI animations and ripple effects!
 
 # Features
+- Playlist support (currently in beta)
 - High Quality Download
 - Applying metadata and thumbnails to output file
 - Output converter
