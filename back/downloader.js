@@ -1,5 +1,4 @@
 const { YoutubeDlPackage, FfmpegPackage } = require("./dependency-installer")
-const { create } = require("youtube-dl-exec")
 const { execFile } = require("child_process")
 const { registerIpcListener, invoke } = require("./ipc-handler")
 const { appDataDir } = require("./config")
@@ -9,7 +8,6 @@ const fs = require("fs")
 const {randomUUID} = require("crypto")
 
 
-const youtubeDl = create(YoutubeDlPackage.executor)
 let currentProcess
 let aborted
 
@@ -55,14 +53,21 @@ class YoutubeDlVideo{
         this.targetFormat = ""
     }
     getInfo(){
-        return youtubeDl(this.url, {
-            // dumpSingleJson: true,
-            dumpJson: true,
-            noWarnings: true,
-            simulate: true,
-            skipDownload: true,
-            noCallHome: true,
-            noCheckCertificate: true
+        const ytInfo = execFile(YoutubeDlPackage.executor, [
+            "--dump-single-json",
+            this.url
+        ])
+        return new Promise((resolve, reject) => {
+            ytInfo.stdout.on("data", data => {
+                try{
+                    resolve(JSON.parse(data))
+                }catch (e){
+                    reject(e)
+                }
+            })
+            ytInfo.stderr.on("data", data => {
+                console.warn(data)
+            })
         })
     }
     download(format, container, target, fileType, callback){
