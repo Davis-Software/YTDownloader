@@ -299,8 +299,18 @@ urlInputApply.addEventListener("click", _ => {
         })
     }
 })
+
+function isPlaylist(info = videoInfoData){
+    if(!info) return false
+    return info.playlist_count && info.playlist_count > 1
+}
 window.downloader.on("returnInfo", (_, info) => {
     window.controls.setProgressBar(-1)
+
+    if(!info){
+        errorOut("Info Error", "Failed to retrieve video info. Please check your url and try again.")
+        return
+    }
 
     function isYoutube(){
         return info.webpage_url.includes("https://youtube.com/")
@@ -313,43 +323,59 @@ window.downloader.on("returnInfo", (_, info) => {
     loaderCollapse.hide()
     videoInfoCollapse.show()
 
-    videoInfo.querySelector("img").src = info?.thumbnail
-    videoInfo.querySelector("#video-title").textContent = info?.title || "No title"
+    if(isPlaylist(info)){
+        videoInfo.querySelector("img").src = info.thumbnails.pop()?.url
+        videoInfo.querySelector("#video-description").innerText = `Videos in Playlist: \n${info.entries.map(entry => "    " + entry.title).join("\n")}`
+
+        let elem = document.createElement("option")
+        elem.disabled = true
+        elem.textContent = "Playlists don't support custom formats"
+        videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
+
+        selectedThumbnail = info.thumbnails.pop()?.url
+    }else{
+        videoInfo.querySelector("img").src = info.thumbnail
+        videoInfo.querySelector("#video-description").innerText = info.description || "No Video description"
+
+        for(let format of info.formats){
+            let elem = document.createElement("option")
+            elem.value = format.format_id
+            elem.textContent = format.width ? formatVideoFormat(format) : formatAudioFormat(format)
+            videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
+        }
+
+        selectedThumbnail = info.thumbnail
+    }
+
+    videoInfo.querySelector("#video-title").textContent = info.title || "No title"
 
     videoInfo.querySelector("#video-creator").textContent = isYoutube()
         ? info.channel
-        : info?.uploader || "Unknown"
-    videoInfo.querySelector("#video-likes").textContent = info?.like_count || "Unknown"
-    videoInfo.querySelector("#video-views").textContent = info?.view_count || "Unknown"
-    videoInfo.querySelector("#video-description").innerText = info?.description || "No Video description"
+        : (info.uploader || "Unknown")
+    videoInfo.querySelector("#video-likes").textContent = info.like_count || "Unknown"
+    videoInfo.querySelector("#video-views").textContent = info.view_count || "Unknown"
 
-    for(let category of info?.categories || ["No categories"]){
+    for(let category of info.categories || ["No categories"]){
         let elem = document.createElement("span")
         elem.classList.add("badge", "rounded-pill", "bg-secondary")
         elem.textContent = category
         videoInfo.querySelector("#video-categories").append(elem)
     }
 
-    for(let format of info.formats){
-        let elem = document.createElement("option")
-        elem.value = format.format_id
-        elem.textContent = format.width ? formatVideoFormat(format) : formatAudioFormat(format)
-        videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
-    }
     callAttention(videoFormatSelector)
 
     // DownloadOptions
-    downloadOptionsCustomFilenameInput.value = info?.title || ""
-    if((info?.title || "").includes("-")){
+    downloadOptionsCustomFilenameInput.value = info.title || ""
+    if((info.title || "").includes("-")){
         downloadOptionsSongModeArtistInput.value = info.title.split("-")[0].trim()
         downloadOptionsSongModeTitleInput.value = info.title.split("-")[1].trim()
     }else{
         downloadOptionsSongModeArtistInput.value = isYoutube()
             ? info.channel
-            : info?.uploader || "Unknown"
-        downloadOptionsSongModeTitleInput.value = info?.title || "output"
+            : info.uploader || "Unknown"
+        downloadOptionsSongModeTitleInput.value = info.title || "output"
     }
-    selectedThumbnail = info?.thumbnail
+
     downloadOptionsApplyThumbnailPreview.src = selectedThumbnail
 
     videoInfoData = info
@@ -361,7 +387,7 @@ window.downloader.on("returnInfo", (_, info) => {
 })
 videoPreviewContinue.disabled = true
 videoFormatSelector.addEventListener("input", _ => {
-    if(videoFormatSelector.value.includes("preset-max")){
+    if(videoFormatSelector.value.includes("preset-max") || isPlaylist()){
         function getFormatObjFromId(formatId){
             for(let format of videoInfoData.formats){
                 if(format.format_id === formatId.toString()){
@@ -371,36 +397,54 @@ videoFormatSelector.addEventListener("input", _ => {
             return null
         }
 
-        let formatTarget = videoInfoData.format_id.split("+")
-        let videoFormat = formatTarget[0]
-        let audioFormat = formatTarget.pop()
+        if(isPlaylist()){
+            switch (videoFormatSelector.value.split("preset-")[1]){
+                case "max-video":
+                    selectedDownloadFormat = "bestvideo"
+                    selectedDownloadOutputMode = "video"
+                    break
+                case "max-audio":
+                    selectedDownloadFormat = "bestaudio"
+                    selectedDownloadOutputMode = "audio"
+                    break
+                default:
+                    selectedDownloadFormat = "bestaudio+bestvideo"
+                    selectedDownloadOutputMode = "normal"
+                    break
+            }
+            videoFormatInfoBox.textContent = ""
+        }else{
+            let formatTarget = videoInfoData.format_id.split("+")
+            let videoFormat = formatTarget[0]
+            let audioFormat = formatTarget.pop()
 
-        let selectedFormatObj
-        switch (videoFormatSelector.value.split("preset-")[1]){
-            case "max-video":
-                selectedDownloadFormat = videoFormat
-                selectedDownloadOutputMode = "video"
+            let selectedFormatObj
+            switch (videoFormatSelector.value.split("preset-")[1]){
+                case "max-video":
+                    selectedDownloadFormat = videoFormat
+                    selectedDownloadOutputMode = "video"
 
-                selectedFormatObj = getFormatObjFromId(videoFormat)
-                videoFormatInfoBox.innerText = `Video: ${formatVideoFormat(selectedFormatObj)}\nAudio: None`
-                break
-            case "max-audio":
-                selectedDownloadFormat = audioFormat
-                selectedDownloadOutputMode = "audio"
+                    selectedFormatObj = getFormatObjFromId(videoFormat)
+                    videoFormatInfoBox.innerText = `Video: ${formatVideoFormat(selectedFormatObj)}\nAudio: None`
+                    break
+                case "max-audio":
+                    selectedDownloadFormat = audioFormat
+                    selectedDownloadOutputMode = "audio"
 
-                selectedFormatObj = getFormatObjFromId(audioFormat)
-                videoFormatInfoBox.innerText = `Video: None\nAudio: ${formatAudioFormat(selectedFormatObj)}`
-                break
-            default:
-                selectedDownloadFormat = videoInfoData.format_id
-                selectedDownloadOutputMode = "normal"
+                    selectedFormatObj = getFormatObjFromId(audioFormat)
+                    videoFormatInfoBox.innerText = `Video: None\nAudio: ${formatAudioFormat(selectedFormatObj)}`
+                    break
+                default:
+                    selectedDownloadFormat = videoInfoData.format_id
+                    selectedDownloadOutputMode = "normal"
 
-                let selectedVideoFormatObj = getFormatObjFromId(videoFormat)
-                let selectedAudioFormatObj = getFormatObjFromId(audioFormat)
-                videoFormatInfoBox.innerText = `Video: ${formatVideoFormat(selectedVideoFormatObj)}\nAudio: ${formatAudioFormat(selectedAudioFormatObj)}`
-                break
+                    let selectedVideoFormatObj = getFormatObjFromId(videoFormat)
+                    let selectedAudioFormatObj = getFormatObjFromId(audioFormat)
+                    videoFormatInfoBox.innerText = `Video: ${formatVideoFormat(selectedVideoFormatObj)}\nAudio: ${formatAudioFormat(selectedAudioFormatObj)}`
+                    break
+            }
+            selectedDownloadFormatContainer = videoInfoData.ext
         }
-        selectedDownloadFormatContainer = videoInfoData.ext
     }else{
         selectedDownloadFormat = videoFormatSelector.value
         selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === videoFormatSelector.value).ext
@@ -504,6 +548,7 @@ function updateDownloadOutputLocation(){
     }else if(
         downloadOptionsSongModeCheckbox.checked
         && (downloadOptionsSongModeAffectsFileName.checked || downloadOptionsSongModeAffectsFileName.disabled)
+        && !isPlaylist()
     ){
         downloadOptionsSongModeAffectsFileName.disabled = false
         downloadOptionsSongModeAffectsFileName.checked = true
@@ -513,12 +558,13 @@ function updateDownloadOutputLocation(){
     if(!fileNameFormat.test(addition)){
         outputLocationInput.classList.add("text-danger")
         downloadOptionsStart.disabled = true
+        callAttention(outputLocationInput)
     }else{
         outputLocationInput.classList.remove("text-danger")
         downloadOptionsStart.disabled = false
     }
 
-    addition += `.${selectedDownloadOutputFileType}`
+    addition += isPlaylist() ? "/" : `.${selectedDownloadOutputFileType}`
 
     selectedDownloadOutputFile = window.utils.path.join(selectedDownloadOutputFilePath, addition)
     outputLocationInput.value = selectedDownloadOutputFile
@@ -544,6 +590,10 @@ function setDownloadOptionsCustomFilenameCollapseState(){
 downloadOptionsCustomFilenameCheckbox.addEventListener("input", setDownloadOptionsCustomFilenameCollapseState)
 setInterval(setDownloadOptionsCustomFilenameCollapseState, 250)
 function setDownloadOptionsSongModeCollapseState(){
+    if(isPlaylist()){
+        if(downloadOptionsSongModeCollapse._isShown()) downloadOptionsSongModeCollapse.hide()
+        return
+    }
     if(downloadOptionsSongModeCheckbox.checked === downloadOptionsSongModeCollapse._isShown()) return
     if(downloadOptionsSongModeCheckbox.checked){
         downloadOptionsSongModeCollapse.show()
@@ -563,6 +613,10 @@ downloadOptionsSongModeAffectsFileName.addEventListener("input", updateDownloadO
 downloadOptionsApplyThumbnail.addEventListener("input", setDownloadOptionsApplyThumbnailCollapseState)
 setInterval(setDownloadOptionsApplyThumbnailCollapseState, 250)
 function setDownloadOptionsApplyThumbnailCollapseState(){
+    if(isPlaylist()){
+        if(downloadOptionsApplyThumbnailCollapse._isShown()) downloadOptionsApplyThumbnailCollapse.hide()
+        return
+    }
     if(downloadOptionsApplyThumbnail.checked === downloadOptionsApplyThumbnailCollapse._isShown()) return
     if(downloadOptionsApplyThumbnail.checked){
         downloadOptionsApplyThumbnailCollapse.show()
@@ -619,6 +673,7 @@ downloadOptionsStart.addEventListener("click", _ => {
         : null
 
     window.downloader.startDownload(
+        isPlaylist(),
         urlInput.value,
         selectedDownloadFormat,
         selectedDownloadFormatContainer,
@@ -694,7 +749,7 @@ window.downloader.on("progress:log", (_, data) => {
 
 // Temporary dev stuff
 setTimeout(_ => {
-    // urlInput.value = "https://www.youtube.com/watch?v=Rp8_5W76AT0"
+    // urlInput.value = "https://www.youtube.com/watch?v=WZRh2yUDUvQ&list=PLC1og_v3eb4gIg85NKJPj6jewk5YvWAtx&pp=iAQB"
     // urlInputApply.click()
 
     // settingsCollapse.hide()

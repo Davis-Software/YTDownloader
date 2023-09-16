@@ -81,13 +81,74 @@ class YoutubeDlVideo{
         this.targetFormat = fileType
         this.lastTarget = `${this.uuid}-raw.${container}`
 
-        const ytDownload = execFile(YoutubeDlPackage.executor, [
+        const dwnOpts = [
             "-f", format,
             "-o", path.join(this.tempTarget, this.lastTarget),
             "--ffmpeg-location", FfmpegPackage.executor,
             "--audio-quality", "0",
             this.url
-        ])
+        ]
+
+        YoutubeDlVideo.ytDlProcess(dwnOpts, _ => {
+            this._downloaded = true
+            callback()
+        })
+    }
+    downloadPlaylist(format, target, fileType, embedMetadata, callback){
+        log("Initialized downloader components...")
+        log("Starting to download...")
+
+        invoke("downloader:progress:info", "Starting download...")
+        invoke("downloader:progress:mode", "stable")
+        this.target = target
+        this.targetFormat = fileType
+
+        fs.mkdirSync(path.join(this.tempTarget, this.uuid))
+
+        const dwnOpts = [
+            "-f", format,
+            "-P", path.join(this.tempTarget, this.uuid),
+            "--ffmpeg-location", FfmpegPackage.executor
+        ]
+        if(embedMetadata){
+            dwnOpts.push("--add-metadata")
+        }
+        dwnOpts.push(this.url)
+
+        YoutubeDlVideo.ytDlProcess(dwnOpts, _ => {
+            this._downloaded = true
+            callback()
+        })
+    }
+    convertPlaylist(callback){
+        if(!this._downloaded) return
+
+        log("Converting files to target format")
+        invoke("downloader:progress:info", "Converting files...")
+        invoke("downloader:progress:mode", "unstable")
+
+        fs.mkdirSync(this.target, {recursive: true})
+
+        let files = fs.readdirSync(path.join(this.tempTarget, this.uuid))
+        let converted = 0
+        for(let file of files){
+            let convOptions = [
+                "-y",
+                "-i", path.join(this.tempTarget, this.uuid, file),
+            ]
+            let name = `${file.split(".").slice(0, -1).join(".")}.${this.targetFormat}`
+            convOptions.push(path.join(this.target, name))
+            YoutubeDlVideo.ffMpegProcess(convOptions, _ => {
+                converted++
+                log(`Converted ${converted} of ${files.length}`)
+                if(converted === files.length){
+                    callback()
+                }
+            })
+        }
+    }
+    static ytDlProcess(options, callback){
+        const ytDownload = execFile(YoutubeDlPackage.executor, options)
         currentProcess = ytDownload
 
         ytDownload.stdout.on("data", data => {
@@ -111,11 +172,9 @@ class YoutubeDlVideo{
                 aborted = false
             }else {
                 log("Download process completed")
-                this._downloaded = true
                 callback()
             }
         })
-
         ytDownload.stderr.on('data', data => {
             log(data, "err")
         })
@@ -228,20 +287,10 @@ class YoutubeDlVideo{
         invoke("downloader:progress:mode", "stable")
 
         if(!this._downloaded) return
-        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-raw.${this.container}`))){
-            fs.rm(path.join(this.tempTarget, `${this.uuid}-raw.${this.container}`), () => {})
-        }
-        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-converted.${this.targetFormat}`))){
-            fs.rm(path.join(this.tempTarget, `${this.uuid}-converted.${this.targetFormat}`), () => {})
-        }
-        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-metadata.` + this.targetFormat))){
-            fs.rm(path.join(this.tempTarget, `${this.uuid}-metadata.` + this.targetFormat), () => {})
-        }
-        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-thumbnail.` + this.targetFormat))){
-            fs.rm(path.join(this.tempTarget, `${this.uuid}-thumbnail.` + this.targetFormat), () => {})
-        }
-        if(fs.existsSync(path.join(this.tempTarget, `${this.uuid}-thumb.png`))){
-            fs.rm(path.join(this.tempTarget, `${this.uuid}-thumb.png`), () => {})
+
+        for(let file of fs.readdirSync(this.tempTarget)){
+            if(!file.startsWith(this.uuid)) continue
+            fs.rm(path.join(this.tempTarget, file), {recursive: true})
         }
 
         invoke("downloader:progress:downloadComplete")
@@ -257,7 +306,7 @@ function registerListeners() {
             invoke("downloader:error", makeError(err))
         })
     })
-    registerIpcListener("downloader:startDownload", (_, url, format, container, target, fileType, metadata, thumbnail) => {
+    registerIpcListener("downloader:startDownload", (_, playlist, url, format, container, target, fileType, metadata, thumbnail) => {
         let video = new YoutubeDlVideo(url)
 
         function end(){
@@ -299,9 +348,17 @@ function registerListeners() {
             }
         }
 
-        video.download(format, container, target, fileType, _ => {
-            simpleConvert()
-        })
+        if(playlist){
+            video.downloadPlaylist(format, target, fileType, !!metadata, () => {
+                video.convertPlaylist(() => {
+                    video.cleanup()
+                })
+            })
+        }else{
+            video.download(format, container, target, fileType, _ => {
+                simpleConvert()
+            })
+        }
     })
     registerIpcListener("downloader:kill", _ => {
         killProcess()
