@@ -11,7 +11,7 @@
         "url": "https://github.com/Davis-Software/YTDownloader"
     },
     "name": "swc_ytdownloader",
-    "version": "0.1.31",
+    "version": "0.1.32",
     "description": "Download and convert Videos from YouTube",
     "repository": "https://github.com/Davis-Software/YTDownloader",
     "license": "MIT",
@@ -43,7 +43,7 @@
         "afterPack": "./afterPackHook.js",
         "extraFiles": [],
         "win": {
-            "target": "nsis",
+            "target": ["nsis", "portable"],
             "icon": "./static/logo/512x512.ico",
             "publish": {
                 "provider": "github",
@@ -52,7 +52,7 @@
             }
         },
         "linux": {
-            "target": "deb",
+            "target": ["deb", "rpm", "AppImage"],
             "icon": "./static/logo/512x512.png",
             "category": "Utility",
             "publish": {
@@ -62,7 +62,7 @@
             }
         },
         "mac": {
-            "target": "dmg",
+            "target": ["dmg", "pkg", "zip"],
             "icon": "./static/logo/512x512.icns",
             "darkModeSupport": true,
             "publish": {
