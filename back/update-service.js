@@ -29,7 +29,7 @@ function update_downloaded(){
     }
 }
 function update_error(error){
-    dialog.showErrorBox("Update error", error)
+    dialog.showErrorBox("Update error - " + error.name, error.message + "\n\n" + error.cause + "\n\n" + error.stack)
 }
 
 autoUpdater.on("update-available", update_available)
