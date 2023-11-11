@@ -14,6 +14,7 @@ class ProgressBar {
             darkTheme: true,
             center: true,
             skipTaskbar: true,
+            movable: true,
             webPreferences: {
                 preload: path.join(__dirname, "../", "preload.js"),
                 nodeIntegration: true

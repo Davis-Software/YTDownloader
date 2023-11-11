@@ -75,6 +75,14 @@ body{
 }
 
 
+.window-drag{
+    -webkit-app-region: drag;
+}
+.window-no-drag{
+    -webkit-app-region: no-drag;
+}
+
+
 .icon{
     height: 40px;
 }

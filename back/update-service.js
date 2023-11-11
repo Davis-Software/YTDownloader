@@ -1,5 +1,5 @@
 const { dialog } = require("electron")
-const { getMainWindow } = require("./electron-tools")
+const { getMainWindow, getAllProgressBars} = require("./electron-tools")
 const { invoke } = require("./ipc-handler")
 const { autoUpdater } = require('electron-updater')
 
@@ -16,14 +16,16 @@ function update_not_available(info){
     console.info(`No update available. - Currently running latest on ${info.version}`)
 }
 function update_downloaded(){
+    getAllProgressBars().forEach(bar => bar.minimize())
     let resp = dialog.showMessageBoxSync(win, {
         buttons: ["Yes", "No"],
         message: "Update ready!\nDo you want to restart and update?"
     })
+    autoUpdater.autoInstallOnAppQuit = true
     if(resp === 0){
         autoUpdater.quitAndInstall()
     }else{
-        autoUpdater.autoInstallOnAppQuit = true
+        getAllProgressBars().forEach(bar => bar.restore())
     }
 }
 function update_error(error){
