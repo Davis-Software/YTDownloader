@@ -27,14 +27,14 @@
         "publishmacOS": "electron-builder --x64 --mac -p always"
     },
     "devDependencies": {
-        "electron": "^26.2.0",
-        "electron-builder": "^24.6.4"
+        "electron": "^28.1.4",
+        "electron-builder": "^24.9.1"
     },
     "dependencies": {
-        "axios": "^1.5.0",
-        "electron-updater": "^6.1.4",
+        "axios": "^1.6.5",
+        "electron-updater": "^6.1.7",
         "js-yaml": "^4.1.0",
-        "jsdom": "^22.1.0",
+        "jsdom": "^24.0.0",
         "node-stream-zip": "^1.15.0",
         "compare-versions": "^6.1.0"
     },
