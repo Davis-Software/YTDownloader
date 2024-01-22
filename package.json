@@ -42,6 +42,10 @@
         "appId": "org.software-city.projects.ytdownloader",
         "afterPack": "./afterPackHook.js",
         "extraFiles": [],
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false
+        },
         "win": {
             "target": "nsis",
             "icon": "./static/logo/512x512.ico",
