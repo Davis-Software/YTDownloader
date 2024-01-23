@@ -129,23 +129,34 @@ class YoutubeDlVideo{
 
         fs.mkdirSync(this.target, {recursive: true})
 
-        let files = fs.readdirSync(path.join(this.tempTarget, this.uuid))
-        let converted = 0
-        for(let file of files){
+        let filesL = fs.readdirSync(path.join(this.tempTarget, this.uuid))
+        let semaphoreL = 0
+
+        function convertNext(basePath, semaphore, files, targetFormat, target, callback){
+            if(semaphore > 2 && files.length > 0){
+                setTimeout(() => {
+                    convertNext(basePath, semaphore, files, targetFormat, target, callback)
+                }, 100)
+                return
+            }else if(files.length === 0){
+                callback()
+                return
+            }
+            semaphore++
+            let file = files.pop()
             let convOptions = [
                 "-y",
-                "-i", path.join(this.tempTarget, this.uuid, file),
+                "-i", path.join(basePath, file),
             ]
-            let name = `${file.split(".").slice(0, -1).join(".")}.${this.targetFormat}`
-            convOptions.push(path.join(this.target, name))
+            let name = `${file.split(".").slice(0, -1).join(".")}.${targetFormat}`
+            convOptions.push(path.join(target, name))
             YoutubeDlVideo.ffMpegProcess(convOptions, _ => {
-                converted++
-                log(`Converted ${converted} of ${files.length}`)
-                if(converted === files.length){
-                    callback()
-                }
+                log(`Converted ${name}`)
+                semaphore--
+                convertNext(basePath, semaphore, files, targetFormat, target, callback)
             })
         }
+        convertNext(path.join(this.tempTarget, this.uuid), semaphoreL, filesL, this.targetFormat, this.target, callback)
     }
     static ytDlProcess(options, callback){
         const ytDownload = execFile(YoutubeDlPackage.executor, options)
