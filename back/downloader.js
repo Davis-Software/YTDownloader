@@ -208,7 +208,7 @@ class YoutubeDlVideo{
     simpleConvert(callback){
         if(
             (!this._downloaded || this.container === this.targetFormat)
-        ) return
+        ) return callback()
 
         log("Converting file to target format")
         invoke("downloader:progress:info", "Converting file...")
