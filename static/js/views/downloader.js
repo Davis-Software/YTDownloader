@@ -7,12 +7,14 @@ const settings = document.querySelector("#settings")
 const loader = document.querySelector("#loader")
 const videoInfo = document.querySelector("#video-preview")
 const videoDownload = document.querySelector("#video-download")
+const videoFormatCustomBox = document.querySelector("#format-selector-box-custom")
 
 const messageBoxCollapse = new bootstrap.Collapse(messageBox.parentElement, {toggle: false})
 const settingsCollapse = new bootstrap.Collapse(settings.parentElement)
 const loaderCollapse = new bootstrap.Collapse(loader.parentElement, {toggle: false})
 const videoInfoCollapse = new bootstrap.Collapse(videoInfo.parentElement, {toggle: false})
 const videoDownloadCollapse = new bootstrap.Collapse(videoDownload.parentElement, {toggle: false})
+const videoFormatCustomCollapse = new bootstrap.Collapse(videoFormatCustomBox, {toggle: false})
 
 const presetSettingsDownloadFormatSelect = settings.querySelector("#pr-setting-mode")
 const presetSettingsExportFormatSelect = settings.querySelector("#pr-setting-format")
@@ -23,7 +25,8 @@ const presetSettingsThumbnailCheckbox = settings.querySelector("#pr-setting-thum
 const videoFormatSelector = document.querySelector("#format-selector #format-selector-video")
 const videoFormatInfoBox = document.querySelector("#format-selector #format-info")
 const videoPreviewContinue = document.querySelector("#video-preview-continue")
-
+const videoFormatCustomVideoSelector = videoFormatCustomBox.querySelector("#format-selector-custom-video")
+const videoFormatCustomAudioSelector = videoFormatCustomBox.querySelector("#format-selector-custom-audio")
 const videoFileTypeSelector = document.querySelector("#output-filetype-select")
 const outputLocationInput = document.querySelector("#output-location-selector")
 
@@ -151,6 +154,8 @@ function resetEverything(ignoreMessageBox=false, showSettings=true){
     loaderCollapse.hide()
     videoInfoCollapse.hide()
     videoDownloadCollapse.hide()
+    videoFormatCustomCollapse.hide()
+    videoFormatSelector.querySelector("option[value=custom]").disabled = false
 
     if(showSettings){
         settingsCollapse.show()
@@ -255,6 +260,7 @@ urlInputApply.addEventListener("click", _ => {
             videoInfo.querySelector("#video-likes").textContent = ""
             videoInfo.querySelector("#video-views").textContent = ""
             videoInfo.querySelector("#video-description").innerText = ""
+            videoFormatSelector.querySelector("option[value=custom]").disabled = false
 
             videoInfo.querySelectorAll("#video-categories span").forEach(elem => {
                 elem.remove()
@@ -262,7 +268,11 @@ urlInputApply.addEventListener("click", _ => {
             videoFormatSelector.querySelectorAll("optgroup[label=All] option").forEach(elem => {
                 elem.remove()
             })
+            videoFormatCustomVideoSelector.querySelectorAll("option[data-codeset]").forEach(elem => elem.remove())
+            videoFormatCustomAudioSelector.querySelectorAll("option[data-codeset]").forEach(elem => elem.remove())
             videoFormatSelector.querySelector("option[disabled]").selected = true
+            videoFormatCustomVideoSelector.querySelector("option[disabled]").selected = true
+            videoFormatCustomAudioSelector.querySelector("option[disabled]").selected = true
             videoFormatInfoBox.textContent = ""
             videoPreviewContinue.disabled = true
 
@@ -299,6 +309,10 @@ urlInputApply.addEventListener("click", _ => {
         })
     }
 })
+urlInput.addEventListener("keydown", e => {
+    if(e.key !== "Enter") return
+    urlInputApply.click()
+})
 
 function isPlaylist(info = videoInfoData){
     if(!info) return false
@@ -331,17 +345,35 @@ window.downloader.on("returnInfo", (_, info) => {
         elem.disabled = true
         elem.textContent = "Playlists don't support custom formats"
         videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
+        videoFormatSelector.querySelector("option[value=custom]").disabled = true
 
         selectedThumbnail = info.thumbnails.pop()?.url
     }else{
         videoInfo.querySelector("img").src = info.thumbnail
         videoInfo.querySelector("#video-description").innerText = info.description || "No Video description"
+        videoFormatSelector.querySelector("option[value=custom]").disabled = false
 
         for(let format of info.formats){
             let elem = document.createElement("option")
             elem.value = format.format_id
             elem.textContent = format.width ? formatVideoFormat(format) : formatAudioFormat(format)
             videoFormatSelector.querySelector("optgroup[label=All]").append(elem)
+        }
+        for(let format of info.formats){
+            if(!format.width) continue;
+            let elem = document.createElement("option")
+            elem.setAttribute("data-codeset", "")
+            elem.value = format.format_id
+            elem.textContent = formatVideoFormat(format)
+            videoFormatCustomVideoSelector.append(elem)
+        }
+        for(let format of info.formats){
+            if(format.width) continue;
+            let elem = document.createElement("option")
+            elem.setAttribute("data-codeset", "")
+            elem.value = format.format_id
+            elem.textContent = formatAudioFormat(format)
+            videoFormatCustomAudioSelector.append(elem)
         }
 
         selectedThumbnail = info.thumbnail
@@ -387,16 +419,17 @@ window.downloader.on("returnInfo", (_, info) => {
 })
 videoPreviewContinue.disabled = true
 videoFormatSelector.addEventListener("input", _ => {
-    if(videoFormatSelector.value.includes("preset-max") || isPlaylist()){
-        function getFormatObjFromId(formatId){
-            for(let format of videoInfoData.formats){
-                if(format.format_id === formatId.toString()){
-                    return format
-                }
+    function getFormatObjFromId(formatId){
+        for(let format of videoInfoData.formats){
+            if(format.format_id === formatId.toString()){
+                return format
             }
-            return null
         }
+        return null
+    }
 
+    if(videoFormatSelector.value.includes("preset-max") || isPlaylist()){
+        videoFormatCustomCollapse.hide()
         if(isPlaylist()){
             switch (videoFormatSelector.value.split("preset-")[1]){
                 case "max-video":
@@ -445,15 +478,56 @@ videoFormatSelector.addEventListener("input", _ => {
             }
             selectedDownloadFormatContainer = videoInfoData.ext
         }
+
+        videoPreviewContinue.disabled = false
+        callAttention(videoPreviewContinue)
+    }else if(videoFormatSelector.value === "custom"){
+        videoFormatCustomCollapse.show()
+        callAttention(videoFormatCustomBox)
+        updateCustomFormatSelection()
+        videoFormatInfoBox.textContent = ""
     }else{
+        videoFormatCustomCollapse.hide()
         selectedDownloadFormat = videoFormatSelector.value
-        selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === videoFormatSelector.value).ext
+        selectedDownloadFormatContainer = getFormatObjFromId(videoFormatSelector.value)?.ext
         selectedDownloadOutputMode = "custom"
         videoFormatInfoBox.textContent = ""
+        videoPreviewContinue.disabled = false
+        callAttention(videoPreviewContinue)
+    }
+})
+
+function updateCustomFormatSelection(){
+    let video = videoFormatCustomVideoSelector.value
+    let audio = videoFormatCustomAudioSelector.value
+    if(video === "" || audio === ""){
+        videoPreviewContinue.disabled = true
+        if(video === "" && audio === "") callAttention(videoFormatCustomBox)
+        else if(video === "") callAttention(videoFormatCustomVideoSelector)
+        else if(audio === "") callAttention(videoFormatCustomAudioSelector)
+        return
     }
     videoPreviewContinue.disabled = false
-    callAttention(videoPreviewContinue)
-})
+    if(video !== "none" && audio !== "none"){
+        selectedDownloadFormat = `${video}+${audio}`
+        selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === video)?.ext
+        selectedDownloadOutputMode = "video"
+    }else if(video !== "none" && audio === "none"){
+        selectedDownloadFormat = video
+        selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === video)?.ext
+        selectedDownloadOutputMode = "video"
+    }else if(video === "none" && audio !== "none"){
+        selectedDownloadFormatContainer = audio
+        selectedDownloadFormatContainer = videoInfoData.formats.find(format => format.format_id === audio)?.ext
+        selectedDownloadOutputMode = "audio"
+    }else{
+        videoPreviewContinue.disabled = true
+        callAttention(videoFormatCustomBox)
+    }
+    videoFormatInfoBox.textContent = ""
+}
+videoFormatCustomVideoSelector.addEventListener("input", updateCustomFormatSelection)
+videoFormatCustomAudioSelector.addEventListener("input", updateCustomFormatSelection)
 
 videoPreviewContinue.addEventListener("click", _ => {
     if(videoPreviewContinue.disabled) return

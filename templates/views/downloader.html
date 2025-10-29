@@ -118,8 +118,23 @@
                         <option value="preset-max-video">Auto - max video</option>
                         <option value="preset-max">Auto - max audio & video</option>
                     </optgroup>
+                    <optgroup label="Other">
+                        <option label="Custom" value="custom">Custom</option>
+                    </optgroup>
                     <optgroup label="All"></optgroup>
                 </select>
+                <div id="format-selector-box-custom" class="collapse">
+                    <label for="format-selector-custom-video">Select a custom video format:</label>
+                    <select class="form-select" id="format-selector-custom-video">
+                        <option value="" disabled selected>Please select a video format</option>
+                        <option value="none">None</option>
+                    </select>
+                    <label for="format-selector-custom-audio">Select a audio video format:</label>
+                    <select class="form-select" id="format-selector-custom-audio">
+                        <option value="" disabled selected>Please select an audio format</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
                 <p id="format-info" class="mt-1"></p>
             </div>
 
