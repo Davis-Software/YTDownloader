@@ -27,16 +27,17 @@
         "publishmacOS": "electron-builder --x64 --mac -p always"
     },
     "devDependencies": {
-        "electron": "^28.1.4",
-        "electron-builder": "^24.9.1"
+        "electron": "^39.0.0",
+        "electron-builder": "^26.0.12"
     },
     "dependencies": {
         "axios": "^1.6.5",
-        "electron-updater": "^6.1.7",
+        "electron-updater": "^6.6.2",
         "js-yaml": "^4.1.0",
         "jsdom": "^24.0.0",
         "node-stream-zip": "^1.15.0",
-        "compare-versions": "^6.1.0"
+        "compare-versions": "^6.1.1",
+        "stream-json": "^1.9.1"
     },
     "build": {
         "appId": "org.software-city.projects.ytdownloader",
