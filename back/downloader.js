@@ -7,6 +7,9 @@ const path = require("path")
 const fs = require("fs")
 const {randomUUID} = require("crypto")
 
+const {parser} = require("stream-json");
+const {streamObject} = require("stream-json/streamers/StreamObject")
+
 
 let currentProcess
 let aborted
@@ -58,13 +61,17 @@ class YoutubeDlVideo{
             this.url
         ])
         return new Promise((resolve, reject) => {
-            ytInfo.stdout.on("data", data => {
-                try{
-                    resolve(JSON.parse(data))
-                }catch (e){
-                    reject(e)
-                }
-            })
+            const jsonResult = {}
+            const pipeline = ytInfo.stdout.pipe(parser()).pipe(streamObject())
+
+            pipeline.on("data", ({ key, value }) => {
+                jsonResult[key] = value;
+            });
+            pipeline.on("end", () => {
+              resolve(jsonResult);
+            });
+            pipeline.on("error", reject);
+
             ytInfo.stderr.on("data", data => {
                 console.warn(data)
             })
@@ -315,6 +322,7 @@ function registerListeners() {
             invoke(responder, info)
         }).catch(err => {
             invoke("downloader:error", makeError(err))
+            console.error(err)
         })
     })
     registerIpcListener("downloader:startDownload", (_, playlist, url, format, container, target, fileType, metadata, thumbnail) => {
