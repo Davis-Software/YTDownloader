@@ -29,10 +29,13 @@ function MainWindow () {
         darkTheme: true,
         frame: config.devMode,
         webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-            nodeIntegration: true,
+            preload: path.join(__dirname, "preload.js")
         }
     })
+    win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+		console.log('Denied access to "' + permission + '" permission requested by site')
+		return callback(false)
+	})
 
     win.identifier = "main-window"
     require("./back/update-service")

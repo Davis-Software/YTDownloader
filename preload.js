@@ -1,10 +1,9 @@
 const { contextBridge, ipcRenderer } = require("electron")
-const path = require("path")
 
 
 contextBridge.exposeInMainWorld("utils", {
     path: {
-        join: (...args) => path.join(...args)
+        join: (...args) => args.join("/")
     },
     openExternal: (url) => ipcRenderer.invoke("openExternal", url)
 })
