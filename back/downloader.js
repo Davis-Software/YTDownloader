@@ -168,6 +168,7 @@ class YoutubeDlVideo{
     }
     static ytDlProcess(options, callback){
         if(process.platform === "darwin") options.push("--no-check-certificate")
+        options.push("--ffmpeg-location", FfmpegPackage.executor)
         const ytDownload = execFile(YoutubeDlPackage.executor, options)
         currentProcess = ytDownload
 
