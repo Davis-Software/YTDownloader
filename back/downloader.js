@@ -58,6 +58,7 @@ class YoutubeDlVideo{
     getInfo(){
         const ytInfo = execFile(YoutubeDlPackage.executor, [
             "--dump-single-json",
+            "--no-check-certificate",
             this.url
         ])
         return new Promise((resolve, reject) => {
@@ -166,6 +167,7 @@ class YoutubeDlVideo{
         convertNext(path.join(this.tempTarget, this.uuid), semaphoreL, filesL, this.targetFormat, this.target, callback)
     }
     static ytDlProcess(options, callback){
+        if(process.platform === "darwin") options.push("--no-check-certificate")
         const ytDownload = execFile(YoutubeDlPackage.executor, options)
         currentProcess = ytDownload
 
